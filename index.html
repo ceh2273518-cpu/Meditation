@@ -1,0 +1,1268 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CHOI 1단계 대시보드 — 명상·심리치유 공모사업</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#F6F8F6; --surface:#FFFFFF; --sunken:#EDF1EE; --ink:#151E1B; --ink-2:#3A4744;
+  --muted:#5E6A65; --rule:#DCE3DF; --rule-strong:#C2CDC7;
+  --accent:#2F6F62; --accent-soft:#E1EEE9;
+  --signal:#8A5A12; --signal-soft:#F6ECDA;
+  --critical:#993A30; --critical-soft:#F7E4E1;
+  --info:#2C5A80; --info-soft:#E2ECF4;
+  --shadow:0 1px 2px rgba(21,30,27,.05),0 8px 24px -16px rgba(21,30,27,.28);
+  /* Nanum Myeongjo 도 Windows 기본 미설치, Georgia 는 한글 없음 → 바탕 추가 */
+  --f-display:"Gowun Batang","Nanum Myeongjo","바탕","Batang",Georgia,serif;
+  --f-body:"IBM Plex Sans KR","Malgun Gothic",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono","D2Coding",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#101614; --surface:#18201D; --sunken:#141B19; --ink:#E7EDE9; --ink-2:#BAC6C1;
+    --muted:#8B9994; --rule:#2A3531; --rule-strong:#3C4A45;
+    --accent:#74C4AE; --accent-soft:#1B2E29;
+    --signal:#D8A75E; --signal-soft:#2E2519;
+    --critical:#E28D80; --critical-soft:#33201D;
+    --info:#7FB0D6; --info-soft:#182632;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#101614; --surface:#18201D; --sunken:#141B19; --ink:#E7EDE9; --ink-2:#BAC6C1;
+  --muted:#8B9994; --rule:#2A3531; --rule-strong:#3C4A45;
+  --accent:#74C4AE; --accent-soft:#1B2E29;
+  --signal:#D8A75E; --signal-soft:#2E2519;
+  --critical:#E28D80; --critical-soft:#33201D;
+  --info:#7FB0D6; --info-soft:#182632;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);
+  font-size:15.5px;line-height:1.65;-webkit-font-smoothing:antialiased;word-break:keep-all}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+.wrap{width:min(1240px,100% - 2.5rem);margin-inline:auto}
+
+/* header */
+.mast{border-bottom:1px solid var(--rule);background:linear-gradient(180deg,var(--sunken),var(--paper));position:sticky;top:0;z-index:50;backdrop-filter:blur(6px)}
+.mast-inner{padding:1.1rem 0 0;display:flex;flex-direction:column;gap:.85rem}
+.mast-top{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:.6rem}
+.brand{display:flex;align-items:baseline;gap:.8rem;flex-wrap:wrap}
+/* 음수 자간은 라틴 전용이다. 한글, 특히 명조는 획이 가늘어 붙음이 더 드러난다 */
+.brand h1{font-family:var(--f-display);font-weight:600;font-size:1.05rem;margin:0;letter-spacing:0}
+.brand .sub{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.mast-meta{font-family:var(--f-mono);font-size:.72rem;color:var(--muted);display:flex;gap:1.1rem;flex-wrap:wrap}
+nav{display:flex;gap:.15rem;overflow-x:auto;padding-bottom:0}
+nav button{appearance:none;border:0;background:transparent;font-family:var(--f-body);font-size:.87rem;
+  font-weight:500;color:var(--muted);padding:.6rem .85rem;cursor:pointer;white-space:nowrap;
+  border-bottom:2px solid transparent;transition:color .12s}
+nav button:hover{color:var(--ink)}
+nav button[aria-current="page"]{color:var(--accent);border-bottom-color:var(--accent)}
+nav .n{font-family:var(--f-mono);font-size:.7rem;margin-left:.3rem;color:var(--muted)}
+
+main{padding:1.9rem 0 5rem}
+.sec-title{font-family:var(--f-display);font-weight:700;font-size:1.6rem;margin:0 0 .3rem;letter-spacing:0}
+.sec-desc{color:var(--ink-2);font-size:.92rem;margin:0 0 1.2rem;max-width:74ch}
+
+/* KPI */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:1px;background:var(--rule);
+  border:1px solid var(--rule);border-radius:3px;overflow:hidden;margin-bottom:1.6rem}
+.kpi{background:var(--surface);padding:.95rem 1rem;display:flex;flex-direction:column;gap:.12rem}
+.kpi dt{font-size:.72rem;color:var(--muted);order:2;letter-spacing:.02em}
+.kpi dd{margin:0;order:1;font-family:var(--f-mono);font-weight:600;font-size:1.25rem;
+  line-height:1.2;font-variant-numeric:tabular-nums}
+.kpi .note{order:3;font-size:.7rem;color:var(--muted);margin-top:.2rem}
+.kpi.ok dd{color:var(--accent)} .kpi.warn dd{color:var(--signal)} .kpi.crit dd{color:var(--critical)}
+
+/* cards / panels */
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:3px;padding:1.15rem 1.25rem;box-shadow:var(--shadow)}
+.panel + .panel{margin-top:1rem}
+.panel h3{font-family:var(--f-body);font-weight:600;font-size:1rem;margin:0 0 .6rem}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:1rem}
+
+/* callout */
+.call{border:1px solid var(--rule-strong);border-left:3px solid var(--accent);background:var(--surface);
+  border-radius:0;padding:1rem 1.15rem;margin-bottom:1.2rem}
+.call.warn{border-left-color:var(--signal);background:var(--signal-soft)}
+.call.crit{border-left-color:var(--critical);background:var(--critical-soft)}
+.call.info{border-left-color:var(--info);background:var(--info-soft)}
+.call .lab{font-family:var(--f-mono);font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;
+  font-weight:600;color:var(--accent);display:block;margin-bottom:.35rem}
+.call.warn .lab{color:var(--signal)} .call.crit .lab{color:var(--critical)} .call.info .lab{color:var(--info)}
+.call p{margin:0 0 .5rem;font-size:.92rem}.call p:last-child{margin:0}
+
+/* table */
+.tw{max-height:min(70vh,720px);overflow:auto;overscroll-behavior:contain;
+  border:1px solid var(--rule);border-radius:3px;background:var(--surface)}
+/* 본문 1.65 는 한글 장문에 맞지만 203행 표에는 과하다 */
+table{border-collapse:collapse;width:100%;font-size:.86rem;min-width:640px;line-height:1.45}
+th,td{padding:.55rem .75rem;text-align:left;vertical-align:top;border-bottom:1px solid var(--rule)}
+thead th{background:var(--sunken);font-weight:600;font-size:.72rem;letter-spacing:.05em;color:var(--muted);
+  white-space:nowrap;border-bottom:1px solid var(--rule-strong);position:sticky;top:0;z-index:3;cursor:pointer;user-select:none}
+thead th:hover{color:var(--ink)}
+thead th .ar{font-family:var(--f-mono);font-size:.65rem;margin-left:.2rem;color:var(--accent)}
+tbody tr:hover{background:var(--sunken)}
+tbody tr:last-child td{border-bottom:0}
+td.mono,.mono{font-family:var(--f-mono);font-size:.78rem}
+td.num{font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
+a:hover{border-bottom-color:var(--accent)}
+
+/* chips */
+.chip{display:inline-block;font-family:var(--f-body);font-size:.68rem;font-weight:500;letter-spacing:.03em;
+  padding:.1rem .42rem;border-radius:2px;white-space:nowrap;border:1px solid var(--rule-strong);
+  color:var(--ink-2);background:var(--sunken)}
+.chip.ok{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.chip.warn{color:var(--signal);border-color:var(--signal);background:var(--signal-soft)}
+.chip.crit{color:var(--critical);border-color:var(--critical);background:var(--critical-soft)}
+.chip.info{color:var(--info);border-color:var(--info);background:var(--info-soft)}
+.chips{display:flex;flex-wrap:wrap;gap:.32rem}
+
+/* 정렬 헤더 — th 는 포커스를 못 받으므로 안에 native button 을 넣는다 (WCAG 2.1.1) */
+.th-sort{all:unset;display:flex;gap:.3rem;align-items:center;justify-content:space-between;
+  width:100%;padding:.55rem .75rem;cursor:pointer;box-sizing:border-box;
+  font:inherit;color:inherit;letter-spacing:inherit}
+.th-sort:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+thead th:has(.th-sort){padding:0}
+.th-sort .ar{opacity:.4;font-family:var(--f-mono);font-size:.65rem}
+th[aria-sort]:not([aria-sort="none"]) .ar{opacity:1;color:var(--accent)}
+
+/* 빈 상태 — 필터 0건이 막다른 길이 되지 않게 */
+.empty-cell{text-align:center;padding:2.4rem 1rem}
+.empty-h{font-weight:600;margin:0 0 .3rem;font-size:.95rem}
+.empty-cell .small{margin:0 0 .9rem}
+
+/* 탭 그룹 경계 — 9개가 균일하면 아무것도 그룹으로 읽히지 않는다 */
+.nav-sep{width:1px;background:var(--rule-strong);margin:.45rem .75rem;align-self:stretch}
+
+.table-bar{display:flex;justify-content:flex-end;margin-bottom:.4rem}
+
+/* controls */
+.controls{display:flex;flex-wrap:wrap;gap:.55rem;margin-bottom:.9rem;align-items:center}
+input[type=search],select{font-family:var(--f-body);font-size:.86rem;padding:.42rem .65rem;
+  border:1px solid var(--rule-strong);border-radius:3px;background:var(--surface);color:var(--ink);min-width:0}
+input[type=search]{flex:1;min-width:190px}
+.count{font-family:var(--f-mono);font-size:.75rem;color:var(--muted);margin-left:auto}
+.pill{appearance:none;font-family:var(--f-body);font-size:.8rem;padding:.3rem .7rem;border-radius:99px;
+  border:1px solid var(--rule-strong);background:var(--surface);color:var(--ink-2);cursor:pointer}
+.pill[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:500}
+
+/* bar viz */
+.bars{display:flex;flex-direction:column;gap:.5rem}
+.bar-row{display:grid;grid-template-columns:minmax(90px,150px) 1fr auto;gap:.7rem;align-items:center;font-size:.84rem}
+.bar-track{background:var(--sunken);border-radius:2px;height:16px;overflow:hidden;border:1px solid var(--rule)}
+.bar-fill{height:100%;background:var(--accent);border-radius:1px}
+.bar-fill.warn{background:var(--signal)} .bar-fill.crit{background:var(--critical)} .bar-fill.info{background:var(--info)}
+.bar-val{font-family:var(--f-mono);font-size:.76rem;color:var(--muted);font-variant-numeric:tabular-nums;min-width:44px;text-align:right}
+
+/* expandable */
+details{border:1px solid var(--rule);border-radius:3px;background:var(--surface);margin-bottom:.55rem}
+details summary{padding:.7rem .95rem;cursor:pointer;font-weight:500;font-size:.92rem;list-style:none;display:flex;gap:.6rem;align-items:baseline}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:"▸";color:var(--accent);font-size:.8rem;transition:transform .15s}
+details[open] summary::before{content:"▾"}
+details .body{padding:0 .95rem .9rem 2.1rem;font-size:.88rem;color:var(--ink-2);white-space:pre-wrap}
+.rank{font-family:var(--f-mono);font-weight:600;color:var(--accent);font-size:.8rem}
+
+/* ch 는 라틴 0 폭 기준이라 한글에서 82ch = 약 53자로 과하다 */
+.prose{white-space:pre-wrap;font-size:.9rem;line-height:1.72;color:var(--ink-2);max-width:42em}
+.small{font-size:.79rem;color:var(--muted)}
+.loading{padding:4rem 0;text-align:center;color:var(--muted);font-family:var(--f-mono);font-size:.85rem}
+footer{border-top:1px solid var(--rule);background:var(--sunken);margin-top:3rem;padding:1.6rem 0 2.4rem}
+footer .wrap{font-size:.8rem;color:var(--muted)}
+.path{font-family:var(--f-mono);font-size:.72rem;color:var(--ink-2);word-break:break-all}
+@media (max-width:640px){
+  body{font-size:15px}
+  .bar-row{grid-template-columns:minmax(70px,110px) 1fr auto}
+}
+@media print{
+  .tw{max-height:none;overflow:visible}
+  .mast{position:static;backdrop-filter:none}
+  nav,.controls{display:none}
+  details{break-inside:avoid}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="root"><div class="loading">대시보드를 불러오는 중…</div></div>
+
+<!-- 데이터: script 태그로 읽는다. file:// 에서 fetch 는 차단되지만 script 는 되기 때문에
+     이 대시보드는 더블클릭만으로 열린다. 없으면 아래 앱이 fetch 로 폴백한다. -->
+<script src="./data.js" onerror="window.__dataScriptFailed=true"></script>
+<script src="./market.js" onerror="window.__marketScriptMissing=true"></script>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+
+<!-- data-type="module" 을 붙이면 Babel 이 ES 모듈로 실행하고,
+     ES 모듈은 CORS 대상이라 file:// (불투명 origin) 에서 차단된다.
+     import/export 를 쓰지 않으므로 고전 스크립트로 둔다 → 더블클릭으로 열린다. -->
+<script type="text/babel">
+const {useState, useEffect, useMemo, Fragment} = React;
+
+/* ─────────────── 공용 컴포넌트 ─────────────── */
+
+// 기계값을 화면에 그대로 내보내면 한 화면에서 레지스터가 충돌한다.
+// 값(value)은 원본을 유지하고 표시만 한국어로 바꾼다 — 필터가 깨지지 않게.
+const LBL = {
+  openapi:'공개 API', rss:'RSS', html_list:'HTML 목록', manual_only:'수기 확인만',
+  unknown:'미확인', allowed:'상업이용 가능', restricted:'조건부 허용',
+  prohibited:'상업이용 금지', file:'파일', standard:'표준데이터',
+  low:'낮음', medium:'보통', high:'높음',
+};
+const L = v => LBL[v] ?? v;
+
+const Chip = ({k='', children, title}) => <span className={'chip ' + k} title={title}>{children}</span>;
+
+// 지금 화면에 보이는 그 행만 내보낸다 — 필터를 적용한 결과가 곧 사용자의 의도다.
+// BOM 이 없으면 엑셀이 한글을 깨뜨린다.
+function downloadCSV(filename, columns, rows) {
+  const esc = v => {
+    const s = v == null ? '' : String(v);
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  const NL = String.fromCharCode(10);
+  const BOM = String.fromCharCode(0xFEFF);
+  const head = columns.map(c => esc(c.label)).join(',');
+  const body = rows.map(r => columns.map(c => esc(c.csv ? c.csv(r) : r[c.key])).join(',')).join(NL);
+  const blob = new Blob([BOM + head + NL + body], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0);
+}
+
+function Kpi({label, value, note, tone=''}) {
+  return (
+    <div className={'kpi ' + tone}>
+      <dd>{value}</dd>
+      <dt>{label}</dt>
+      {note && <span className="note">{note}</span>}
+    </div>
+  );
+}
+
+function Call({tone='', label, children, style}) {
+  return (
+    <div className={'call ' + tone} style={style}>
+      {label && <span className="lab">{label}</span>}
+      {children}
+    </div>
+  );
+}
+
+function Bars({rows, tone, max: fixedMax}) {
+  // 여러 시리즈를 비교할 때는 호출부가 공통 최대값을 내려준다.
+  // 안 내려주면 시리즈마다 100%가 되어 '격차' 차트가 격차를 못 보여준다.
+  const max = fixedMax ?? Math.max(...rows.map(r => r.value), 1);
+  return (
+    <div className="bars">
+      {rows.map((r, i) => (
+        <div className="bar-row" key={i}>
+          <span title={r.label}>{r.label}</span>
+          <span className="bar-track">
+            <span className={'bar-fill ' + (r.tone || tone || '')} style={{width: (r.value / max * 100) + '%'}} />
+          </span>
+          <span className="bar-val">{r.display ?? r.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* 정렬·검색 가능한 표 */
+function DataTable({columns, rows, initialSort, emptyHint, onReset, csvName}) {
+  const [sort, setSort] = useState(initialSort || null);
+  const sorted = useMemo(() => {
+    if (!sort) return rows;
+    const {key, dir} = sort;
+    const col = columns.find(c => c.key === key);
+    return [...rows].sort((a, b) => {
+      let va = col?.sortValue ? col.sortValue(a) : a[key];
+      let vb = col?.sortValue ? col.sortValue(b) : b[key];
+      if (va == null) va = col?.numeric ? -Infinity : '';
+      if (vb == null) vb = col?.numeric ? -Infinity : '';
+      const r = col?.numeric ? va - vb : String(va).localeCompare(String(vb), 'ko');
+      return dir === 'asc' ? r : -r;
+    });
+  }, [rows, sort, columns]);
+
+  const toggle = k => setSort(s => s && s.key === k ? {key: k, dir: s.dir === 'asc' ? 'desc' : 'asc'} : {key: k, dir: 'asc'});
+
+  return (
+    <Fragment>
+    {csvName && sorted.length > 0 && (
+      <div className="table-bar">
+        <button type="button" className="pill"
+          onClick={() => downloadCSV(csvName, columns, sorted)}>
+          CSV 내보내기 ({sorted.length.toLocaleString()}행)
+        </button>
+      </div>
+    )}
+    <div className="tw">
+      <table>
+        <thead>
+          <tr>{columns.map(c => (
+            <th key={c.key} scope="col"
+                aria-sort={sort?.key === c.key ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
+              <button type="button" className="th-sort" onClick={() => toggle(c.key)}>
+                <span>{c.label}</span>
+                {/* 미정렬 상태에도 ↕ 를 보여야 '정렬 가능한 열'임이 마우스 전에 보인다 */}
+                <span className="ar" aria-hidden="true">
+                  {sort?.key === c.key ? (sort.dir === 'asc' ? '▲' : '▼') : '↕'}
+                </span>
+              </button>
+            </th>
+          ))}</tr>
+        </thead>
+        {sorted.length === 0 ? (
+          <tbody><tr><td colSpan={columns.length} className="empty-cell">
+            <p className="empty-h">조건에 맞는 항목이 없습니다</p>
+            {emptyHint && <p className="small">{emptyHint}</p>}
+            {onReset && <button type="button" className="pill" onClick={onReset}>필터 초기화</button>}
+          </td></tr></tbody>
+        ) : (
+        <tbody>
+          {sorted.map((r, i) => (
+            <tr key={i}>{columns.map(c => <td key={c.key} className={c.cls || ''}>{c.render ? c.render(r) : (r[c.key] ?? '')}</td>)}</tr>
+          ))}
+        </tbody>)}
+      </table>
+    </div>
+    </Fragment>
+  );
+}
+
+function Search({value, onChange, placeholder, count, total}) {
+  return (
+    <div className="controls">
+      <input type="search" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} />
+      <span className="count">{count.toLocaleString()} / {total.toLocaleString()}</span>
+    </div>
+  );
+}
+
+/* ─────────────── 탭: 개요 ─────────────── */
+
+function Overview({d}) {
+  const api = d.api_verification.apis;
+  const notice = api.filter(a => a.kind === '공고');
+  // '수집 가능 131' 은 낙관적 집계였다 — 그중 105 가 사이트 개편에 취약한 HTML 이다.
+  // 실행 가능성 등급으로 쪼개고, 모르는 것(미확인)을 숨기지 않고 화면에 올린다.
+  const stable = d.channels.filter(c => ['openapi','rss'].includes(c.access)).length;
+  const fragile = d.channels.filter(c => c.access === 'html_list').length;
+  const unknownCh = d.channels.filter(c => !c.access || c.access === 'unknown').length;
+  const blocked = d.channels.filter(c => /차단|금지|Disallow|ClaudeBot/i.test(c.tos || '')).length;
+  const commercialOk = d.datasets.filter(x => x.commercial === 'allowed').length;
+  const licUnknown = d.datasets.filter(x => !x.commercial || x.commercial === 'unknown').length;
+
+  const clusterRows = useMemo(() => {
+    const m = {};
+    d.channels.forEach(c => { m[c.cluster] = (m[c.cluster] || 0) + 1; });
+    return Object.entries(m).map(([label, value]) => ({label, value})).sort((a, b) => b.value - a.value);
+  }, [d]);
+
+  const accessRows = useMemo(() => {
+    const m = {};
+    d.channels.forEach(c => { m[c.access || 'unknown'] = (m[c.access || 'unknown'] || 0) + 1; });
+    const tone = {openapi:'', rss:'info', html_list:'warn', manual_only:'crit', unknown:'crit'};
+    return Object.entries(m).map(([label, value]) => ({label, value, tone: tone[label] || ''})).sort((a, b) => b.value - a.value);
+  }, [d]);
+
+  return (
+    <Fragment>
+      <h2 className="sec-title">1단계 — 시장·채널 조사 결과</h2>
+      <p className="sec-desc">명상·심리치유 분야 공모사업을 어디서 어떻게 찾을 수 있는가에 대한 전수조사 결과입니다.
+        1차(채널 {d.channels.length}개 실측) + 2차(공공데이터 {d.datasets.length}건) + API 실호출 검증을 합친 것입니다.</p>
+
+      <dl className="kpis">
+        <Kpi label="안정 수집" value={stable} tone="ok" note="공개 API · RSS — 구조 변경에 강함" />
+        <Kpi label="취약 수집" value={fragile} tone="warn" note="HTML 목록 — 사이트 개편에 깨짐" />
+        <Kpi label="미확인 채널" value={unknownCh} tone="warn" note="접근 방식 판정 못 함" />
+        <Kpi label="준법 차단" value={blocked} tone="crit" note="robots·약관 — 우회하지 않음" />
+        <Kpi label="상업이용 가능" value={commercialOk} tone="ok" note="제안서에 인용 가능" />
+        <Kpi label="라이선스 미확인" value={licUnknown} tone="warn" note="확인 전 인용 금지" />
+        <Kpi label="공고 사례" value={d.programs.length} note="골든셋 초기 자료" />
+        <Kpi label="키워드 사전" value={Object.values(d.keywords).flat().length} note="상위 프레임 축" />
+      </dl>
+
+      <Call tone="warn" label="이 숫자를 어떻게 읽어야 하는가">
+        <p>발굴한 채널 <b>{d.channels.length}개</b> 중 실제로 안정적으로 수집할 수 있는 것은
+          <b> {stable}개</b>입니다. 나머지 {fragile}개는 HTML 목록이라 사이트가 개편되면 깨지고,
+          {unknownCh}개는 접근 방식조차 판정하지 못했습니다.</p>
+        <p>공공데이터도 마찬가지입니다 — <b>미확인 {licUnknown}건이 상업이용 가능 {commercialOk}건보다 많습니다.</b>
+          모르는 것이 아는 것보다 많은 상태이며, 확인 전에는 제안서에 인용하지 않습니다.</p>
+      </Call>
+
+      {d.narrative?.executive_summary && (
+        <details style={{marginBottom:'1.2rem'}}>
+          <summary>1차 조사 총평 — 왜 이 채널들인가</summary>
+          <div className="body prose">{d.narrative.executive_summary}</div>
+        </details>
+      )}
+
+      <Call tone="crit" label="설계를 지배하는 발견 3가지">
+        <p><b>1. "명상" 단독 국가사업은 0건입니다.</b> 명상은 항상 5개 상위 프레임(웰니스관광·산림치유·치유농업·마음건강·템플스테이)의 하위 구성요소로만 등장합니다. → 키워드 사전을 상위 프레임 축으로 설계했습니다.</p>
+        <p><b>2. 공고 수집은 OpenAPI만으로 불가능합니다.</b> '치유' 키워드 오픈API 29건 전수조사에서 지원사업 공고 0건. 문체부·산림청·관광공사·복지부는 공고 API를 열지 않았습니다. → 하이브리드(범용 API + HTML/RSS) 필수.</p>
+        <p><b>3. 준법이 채널 선택을 결정합니다.</b> 명상 적합도 최상위인 템플스테이는 ClaudeBot을 명시 차단 — 우회하지 않고 커버리지 공백으로 기록합니다.</p>
+      </Call>
+
+      <div className="grid2">
+        <div className="panel">
+          <h3>클러스터별 채널 분포</h3>
+          <Bars rows={clusterRows} />
+        </div>
+        <div className="panel">
+          <h3>접근 방식별 분포</h3>
+          <Bars rows={accessRows} />
+          <p className="small" style={{marginTop:'.7rem'}}>OpenAPI·RSS는 수집이 쉽고 안정적입니다. html_list는 사이트 개편에 취약하고, manual_only는 사실상 수집 불가입니다.</p>
+        </div>
+      </div>
+
+      <div className="panel" style={{marginTop:'1rem'}}>
+        <h3>API 실호출 검증 — 2026-08-29</h3>
+        <DataTable
+          columns={[
+            {key:'name', label:'API', render:r => <b>{r.name}</b>},
+            {key:'kind', label:'성격', render:r => r.kind === '공고'
+              ? <Chip k="ok">공고</Chip> : <Chip k="crit">예산편성 · 공고 아님</Chip>},
+            {key:'status', label:'응답', cls:'num'},
+            {key:'total', label:'총건수', cls:'num', numeric:true,
+              render:r => r.total ? r.total.toLocaleString() : '—'},
+            {key:'hits', label:'도메인 키워드 히트', render:r => (
+              <span className="chips">
+                {Object.entries(r.hits || {}).map(([k, v]) => <Chip key={k} k={v > 5 ? 'warn' : ''}>{k} {v}</Chip>)}
+                {!Object.keys(r.hits || {}).length && <span className="small">—</span>}
+              </span>)},
+            {key:'license', label:'라이선스', render:r => /제3유형|변경금지/.test(r.license)
+              ? <Chip k="warn">{r.license}</Chip> : <Chip k="ok">{r.license}</Chip>},
+          ]}
+          rows={api}
+        />
+        <Call tone="warn" label="판정 정정">
+          <p><b>국고보조금 API는 공고가 아닙니다.</b> 응답 28개 필드 중 접수/신청 필드가 0개이고,
+            <span className="mono"> BSNS_BEGIN_DE=2026.01.01 / BSNS_END_DE=2026.12.31</span> 은 회계연도이지 접수기간이 아닙니다.
+            심리·정서 키워드가 300건 중 45건 잡힌 것은 사실이나 <b>지원할 수 있는 공고가 아니며</b>,
+            "어느 부처·지자체에 예산이 편성됐는가"를 보는 <b>선행지표</b>로 활용합니다.</p>
+        </Call>
+      </div>
+    </Fragment>
+  );
+}
+
+/* ─────────────── 탭: 채널 ─────────────── */
+
+function Channels({d}) {
+  const [q, setQ] = useState('');
+  const [cluster, setCluster] = useState('전체');
+  const [access, setAccess] = useState('전체');
+
+  const clusters = useMemo(() => ['전체', ...new Set(d.channels.map(c => c.cluster))], [d]);
+  const accesses = useMemo(() => ['전체', ...new Set(d.channels.map(c => c.access))], [d]);
+
+  const rows = useMemo(() => d.channels.filter(c => {
+    if (cluster !== '전체' && c.cluster !== cluster) return false;
+    if (access !== '전체' && c.access !== access) return false;
+    if (!q) return true;
+    const s = q.toLowerCase();
+    return (c.name || '').toLowerCase().includes(s) || (c.url || '').toLowerCase().includes(s);
+  }), [d, q, cluster, access]);
+
+  return (
+    <Fragment>
+      <h2 className="sec-title">수집 채널 {d.channels.length}개</h2>
+      <p className="sec-desc">6개 클러스터를 서로 다른 각도로 스윕해 발굴하고, 각 채널의 접근 방식·첨부 형식·준법 상태를 실측했습니다.
+        우선순위 상위 17개는 <b>우선순위</b> 탭에서 근거와 함께 볼 수 있습니다.</p>
+
+      <div className="controls">
+        <input type="search" aria-label="채널명·URL 검색" value={q}
+               onChange={e => setQ(e.target.value)} placeholder="채널명·URL 검색…" />
+        <select aria-label="클러스터 필터" value={cluster} onChange={e => setCluster(e.target.value)}>
+          {clusters.map(c => <option key={c} value={c}>{c === '전체' ? '클러스터 — 전체' : c}</option>)}
+        </select>
+        <select aria-label="접근 방식 필터" value={access} onChange={e => setAccess(e.target.value)}>
+          {accesses.map(c => <option key={c} value={c}>{c === '전체' ? '접근 방식 — 전체' : L(c)}</option>)}
+        </select>
+        <span className="count">{rows.length.toLocaleString()} / {d.channels.length.toLocaleString()}</span>
+      </div>
+
+      <DataTable
+        emptyHint={q ? `"${q}" 로는 찾지 못했습니다. 더 짧은 단어로 줄여 보세요.`
+                     : '선택한 클러스터·접근 방식 조합에 해당하는 채널이 없습니다.'}
+        onReset={() => { setQ(''); setCluster('전체'); setAccess('전체'); }}
+        csvName="choi_채널.csv"
+        initialSort={{key:'priority', dir:'desc'}}
+        columns={[
+          {key:'priority', label:'P', cls:'num', numeric:true,
+            render:r => r.priority ? <Chip k={r.priority >= 4 ? 'ok' : r.priority >= 3 ? '' : 'warn'}>{r.priority}</Chip> : '—'},
+          {key:'name', label:'채널', render:r => r.url
+            ? <a href={r.url} target="_blank" rel="noopener noreferrer">{r.name}</a> : r.name},
+          {key:'cluster', label:'클러스터', render:r => <Chip>{r.cluster}</Chip>},
+          {key:'access', label:'접근', render:r => {
+            const t = {openapi:'ok', rss:'info', html_list:'warn', manual_only:'crit', unknown:'crit'}[r.access] || '';
+            return <Chip k={t} title={r.access}>{L(r.access)}</Chip>;
+          }},
+          {key:'attachment', label:'첨부 형식', render:r => <span className="small">{r.attachment || '—'}</span>},
+          {key:'tos', label:'준법 (robots·약관)', render:r => {
+            const blocked = /차단|금지|Disallow|ClaudeBot/i.test(r.tos || '');
+            return <span className="small">{blocked && <Chip k="crit">차단</Chip>} {r.tos || '미확인'}</span>;
+          }},
+        ]}
+        rows={rows}
+      />
+    </Fragment>
+  );
+}
+
+/* ─────────────── 탭: 우선순위 ─────────────── */
+
+function Priority({d}) {
+  return (
+    <Fragment>
+      <h2 className="sec-title">수집 우선순위 17채널</h2>
+      <p className="sec-desc">「명상·심리치유 커버리지 × 수집 용이성」으로 매긴 순위입니다.
+        1~7위는 <b>HWP 파서 없이 즉시 가동 가능</b>합니다. 각 항목을 펼치면 선정 근거와 블로커를 볼 수 있습니다.</p>
+      {d.priority_channels.map(c => (
+        <details key={c.rank} open={c.rank <= 3}>
+          <summary>
+            <span className="rank">{String(c.rank).padStart(2,'0')}</span>
+            <span style={{flex:1}}>{c.name}</span>
+            <Chip k={{openapi:'ok', rss:'info', html_list:'warn', manual_only:'crit'}[c.access] || ''}>{c.access}</Chip>
+            <Chip k={{low:'ok', medium:'', high:'warn'}[c.effort] || ''}>{c.effort}</Chip>
+          </summary>
+          <div className="body">
+            {c.url && <p style={{margin:'0 0 .5rem'}}><a href={c.url} target="_blank" rel="noopener noreferrer" className="mono">{c.url}</a></p>}
+            <p style={{margin:'0 0 .5rem'}}><b>커버리지</b> — {c.coverage}</p>
+            <p style={{margin:'0 0 .5rem'}}><b>선정 근거</b> — {c.rationale}</p>
+            {c.blockers && <p style={{margin:0, color:'var(--critical)'}}><b>블로커</b> — {c.blockers}</p>}
+          </div>
+        </details>
+      ))}
+    </Fragment>
+  );
+}
+
+/* ─────────────── 탭: 공고 사례 ─────────────── */
+
+function Programs({d}) {
+  const [q, setQ] = useState('');
+  const rows = useMemo(() => d.programs.filter(p => {
+    if (!q) return true;
+    const s = q.toLowerCase();
+    return ['name','agency','target','relevance','budget'].some(k => (p[k] || '').toLowerCase().includes(s));
+  }), [d, q]);
+
+  return (
+    <Fragment>
+      <h2 className="sec-title">실제 공고 사례 {d.programs.length}건</h2>
+      <p className="sec-desc">조사에서 확인된 실제 공모·지원사업입니다.
+        <b> 키워드 게이트의 골든셋 초기 자료</b>이자, 사업계획서 작성 시 유사 사업 구조를 참조하는 RAG 소스가 됩니다.</p>
+      <Search value={q} onChange={setQ} placeholder="사업명·기관·대상 검색…" count={rows.length} total={d.programs.length} />
+      <DataTable
+        emptyHint={q ? `"${q}" 로는 찾지 못했습니다. 기관명이나 더 짧은 단어로 시도해 보세요.` : null}
+        onReset={() => setQ('')}
+        csvName="choi_공고사례.csv"
+        columns={[
+          {key:'name', label:'사업명', render:r => r.url
+            ? <a href={r.url} target="_blank" rel="noopener noreferrer">{r.name}</a> : <b>{r.name}</b>},
+          {key:'agency', label:'주관기관'},
+          {key:'budget', label:'예산', render:r => <span className="mono small">{r.budget || '—'}</span>},
+          {key:'period', label:'기간', render:r => <span className="mono small">{r.period || '—'}</span>},
+          {key:'target', label:'대상', render:r => <span className="small">{r.target || '—'}</span>},
+          {key:'relevance', label:'명상 관련성', render:r => <span className="small">{r.relevance || '—'}</span>},
+        ]}
+        rows={rows}
+      />
+    </Fragment>
+  );
+}
+
+/* ─────────────── 탭: 공공데이터 ─────────────── */
+
+function Datasets({d}) {
+  const [q, setQ] = useState('');
+  const [cat, setCat] = useState('전체');
+  const [comm, setComm] = useState('전체');
+
+  const cats = useMemo(() => ['전체', ...new Set(d.datasets.map(x => x.category))], [d]);
+  const rows = useMemo(() => d.datasets.filter(x => {
+    if (cat !== '전체' && x.category !== cat) return false;
+    if (comm !== '전체' && x.commercial !== comm) return false;
+    if (!q) return true;
+    const s = q.toLowerCase();
+    return ['name','provider','use_case','id'].some(k => String(x[k] || '').toLowerCase().includes(s));
+  }), [d, q, cat, comm]);
+
+  const commRows = useMemo(() => {
+    const m = {};
+    d.datasets.forEach(x => { m[x.commercial || 'unknown'] = (m[x.commercial || 'unknown'] || 0) + 1; });
+    const tone = {allowed:'', restricted:'warn', prohibited:'crit', unknown:'info'};
+    return Object.entries(m).map(([label, value]) => ({label, value, tone: tone[label] || ''})).sort((a,b) => b.value - a.value);
+  }, [d]);
+
+  return (
+    <Fragment>
+      <h2 className="sec-title">공공데이터 {d.datasets.length}건</h2>
+      <p className="sec-desc">4계층(공고·시설인프라·통계근거·콘텐츠자산)으로 분류한 공공데이터 카탈로그입니다.
+        <b> 상업 이용 가능 여부</b>가 실질적 게이트입니다 — 최은희 지도사는 영리 사업자이기 때문입니다.</p>
+
+      <div className="grid2" style={{marginBottom:'1.1rem'}}>
+        <div className="panel">
+          <h3>상업 이용 가능 여부</h3>
+          <Bars rows={commRows} />
+        </div>
+        <div className="panel">
+          <h3>사용 정책 (2026-08-29 결정)</h3>
+          <p className="small" style={{margin:'0 0 .5rem'}}>
+            이 시스템은 상업 제품이 아니라 <b>사업계획 수립을 위한 참조자료</b>입니다.
+            따라서 공공누리 제4유형(상업금지) 데이터도 <b>내부 참조용</b>으로 활용합니다.
+          </p>
+          <div className="chips">
+            <Chip k="ok">internal_reference — 시스템 내부 열람·판단 근거</Chip>
+            <Chip k="info">external_ok — 외부 제출 문서에 인용 가능</Chip>
+          </div>
+          <p className="small" style={{marginTop:'.6rem'}}>
+            제4유형은 상업금지와 <b>변경금지</b>를 함께 담고 있어, 외부 제출 제안서에 가공해 싣는 것은 성격이 다릅니다.
+            그래서 데이터는 쓰되 라이선스 표시는 남겨 뒀습니다.
+          </p>
+        </div>
+      </div>
+
+      <div className="controls">
+        <input type="search" aria-label="데이터셋명·제공기관·ID 검색" value={q}
+               onChange={e => setQ(e.target.value)} placeholder="데이터셋명·제공기관·ID 검색…" />
+        <select aria-label="계층 필터" value={cat} onChange={e => setCat(e.target.value)}>
+          {cats.map(c => <option key={c} value={c}>{c === '전체' ? '계층 — 전체' : c}</option>)}
+        </select>
+        <select aria-label="상업이용 필터" value={comm} onChange={e => setComm(e.target.value)}>
+          {['전체','allowed','restricted','prohibited','unknown'].map(c =>
+            <option key={c} value={c}>{c === '전체' ? '상업이용 — 전체' : L(c)}</option>)}
+        </select>
+        <span className="count">{rows.length.toLocaleString()} / {d.datasets.length.toLocaleString()}</span>
+      </div>
+
+      <DataTable
+        emptyHint={q ? `"${q}" 로는 찾지 못했습니다.` : '선택한 계층·라이선스 조합에 해당하는 데이터셋이 없습니다.'}
+        onReset={() => { setQ(''); setCat('전체'); setComm('전체'); }}
+        csvName="choi_공공데이터.csv"
+        columns={[
+          {key:'name', label:'데이터셋', render:r => r.url
+            ? <a href={r.url} target="_blank" rel="noopener noreferrer">{r.name}</a> : r.name},
+          {key:'id', label:'ID', cls:'mono'},
+          {key:'provider', label:'제공기관'},
+          {key:'type', label:'유형', render:r => <Chip k={r.type === 'openapi' ? 'ok' : ''} title={r.type}>{L(r.type)}</Chip>},
+          {key:'commercial', label:'상업이용', render:r => {
+            const t = {allowed:'ok', restricted:'warn', prohibited:'crit'}[r.commercial] || 'info';
+            return <Chip k={t} title={r.commercial}>{L(r.commercial)}</Chip>;
+          }},
+          {key:'use_case', label:'CHOI 활용', render:r => <span className="small">{r.use_case}</span>},
+        ]}
+        rows={rows}
+      />
+    </Fragment>
+  );
+}
+
+/* ─────────────── 탭: 키워드 ─────────────── */
+
+function Keywords({d}) {
+  const [q, setQ] = useState('');
+  const meta = {
+    primary:   {label:'1차 — 하나만 맞아도 통과', tone:'ok'},
+    secondary: {label:'2차 — 2개 조합 시 통과', tone:''},
+    facility:  {label:'시설자금 트랙', tone:'info'},
+    target:    {label:'대상 (청소년·기업·시니어)', tone:'info'},
+    exclude:   {label:'제외어 — 오탐 방지', tone:'crit'},
+  };
+  return (
+    <Fragment>
+      <h2 className="sec-title">키워드 사전 {Object.values(d.keywords).flat().length}개</h2>
+      <p className="sec-desc">규칙 기반 1차 게이트에 쓰는 사전입니다. LLM을 쓰지 않아 비용이 0이고,
+        <b> 왜 통과·탈락했는지 이 파일만 보면 알 수 있습니다.</b> 최은희 지도사가 직접 수정하는 파일입니다
+        (<span className="mono">config/keywords.yaml</span>).</p>
+      <Call tone="warn" label="설계 원칙 — ADR-009">
+        <p>조사에서 <b>'명상'을 표제로 내건 국가 단위 지원사업은 0건</b>이었습니다.
+          실제 공고는 "웰니스관광 운영 지원"(힐링·명상 테마 포함), "국민마음회복 숲처방"(숲명상 포함) 같은 이름으로 나옵니다.
+          그래서 사전을 <b>상위 프레임 축</b>으로 구성했습니다 — '명상' 단독 매칭에 의존하면 아무것도 못 잡습니다.</p>
+      </Call>
+      <div className="controls">
+        <input type="search" aria-label="키워드 검색" value={q}
+               onChange={e => setQ(e.target.value)} placeholder="키워드 검색… (예: 명상, 채용)" />
+        <span className="count">
+          {Object.values(d.keywords).flat().filter(w => !q || w.includes(q)).length.toLocaleString()}
+          {' / '}{Object.values(d.keywords).flat().length.toLocaleString()}
+        </span>
+      </div>
+      {Object.entries(d.keywords).map(([k, arr]) => {
+        const hit = arr.filter(w => !q || w.includes(q));
+        if (q && !hit.length) return null;
+        return (
+          <div className="panel" key={k} style={{marginBottom:'.8rem'}}>
+            <h3>{k} <span className="mono small" style={{fontWeight:400}}>
+              · {q ? `${hit.length} / ${arr.length}` : arr.length}개 — {meta[k]?.label}</span></h3>
+            <div className="chips">{hit.map((w, i) => <Chip key={i} k={meta[k]?.tone}>{w}</Chip>)}</div>
+          </div>
+        );
+      })}
+      {q && !Object.values(d.keywords).flat().some(w => w.includes(q)) && (
+        <div className="panel">
+          <p className="empty-h">"{q}" 를 사전에서 찾지 못했습니다</p>
+          <p className="small">추가하려면 <span className="mono">config/keywords.yaml</span> 을 편집하세요.</p>
+          <button type="button" className="pill" onClick={() => setQ('')}>검색 초기화</button>
+        </div>
+      )}
+    </Fragment>
+  );
+}
+
+/* ─────────────── 탭: 시장·시설자금 ─────────────── */
+
+function Market({d, live}) {
+  const n = d.narrative;
+  return (
+    <Fragment>
+      <h2 className="sec-title">시장 분석 · 시설자금</h2>
+      <p className="sec-desc">최은희 지도사가 <b>어느 방향으로 사업을 확장할지</b> 판단하는 근거입니다.</p>
+
+      {live && live.kpi_cards && (
+        <Fragment>
+          {live.headline && <Call tone="info" label="시장 요약"><p>{live.headline}</p></Call>}
+          <dl className="kpis">
+            {live.kpi_cards.map((c, i) => (
+              <Kpi key={i} label={c.label} value={c.value}
+                note={[c.delta, c.source_org].filter(Boolean).join(' · ')}
+                tone={c.trend === 'up' ? 'ok' : c.trend === 'down' ? 'crit' : ''} />
+            ))}
+          </dl>
+          {live.charts?.map((ch, i) => (
+            <div className="panel" key={i} style={{marginBottom:'.8rem'}}>
+              <h3>{ch.title} <span className="small mono" style={{fontWeight:400}}>{ch.unit && `· ${ch.unit}`}</span></h3>
+              {(() => { const cmax = Math.max(...(ch.series || []).flatMap(x => x.data || []), 1); return ch.series?.map((s, j) => (
+                <div key={j} style={{marginBottom:'.8rem'}}>
+                  {ch.series.length > 1 && <p className="small" style={{margin:'0 0 .3rem'}}><b>{s.name}</b></p>}
+                  <Bars max={cmax} rows={(ch.categories || []).map((cat, k) => ({label: cat, value: s.data?.[k] ?? 0}))} />
+                </div>
+              )); })()}
+              {ch.source_org && <p className="small" style={{marginTop:'.4rem'}}>출처: {ch.source_org}
+                {ch.source_url && <Fragment> · <a href={ch.source_url} target="_blank" rel="noopener noreferrer">원문</a></Fragment>}</p>}
+            </div>
+          ))}
+          {live.opportunities?.length > 0 && (
+            <div className="panel" style={{marginBottom:'1rem'}}>
+              <h3>진입 기회</h3>
+              {[...live.opportunities].sort((a,b) => (a.priority||9) - (b.priority||9)).map((o, i) => (
+                <details key={i}>
+                  <summary><span className="rank">{String(i+1).padStart(2,'0')}</span><span style={{flex:1}}>{o.title}</span></summary>
+                  <div className="body">{o.rationale}{o.evidence && `\n\n근거 — ${o.evidence}`}</div>
+                </details>
+              ))}
+            </div>
+          )}
+        </Fragment>
+      )}
+      {!live && <Call tone="info" label="시장 정량조사"><p>명상·요가 시장 규모/수요/정책예산 정량 조사가 별도로 진행 중입니다.
+        완료되면 이 자리에 KPI 카드와 시계열 차트가 표시됩니다. 아래는 1차 조사의 정성 분석입니다.</p></Call>}
+
+      <div className="panel"><h3>시장 구조 — 축소되는 것과 확대되는 것</h3>
+        <div className="prose">{n.market}</div></div>
+      <div className="panel"><h3>시설자금 — 명상센터·치유센터</h3>
+        <Call tone="crit" label="핵심 사실">
+          <p><b>'명상센터'라는 법정 시설 분류는 대한민국 법령 어디에도 없습니다.</b>
+            자격은 이름이 아니라 <b>어떤 법의 어떤 시설·업종으로 등록·지정·인증받느냐</b>로 결정됩니다.</p>
+        </Call>
+        <div className="prose">{n.facility_funding}</div></div>
+    </Fragment>
+  );
+}
+
+/* ─────────────── 탭: 프로필 ─────────────── */
+
+function Field({label, value, hint}) {
+  const empty = value == null || value === '';
+  return (
+    <div style={{display:'flex', gap:'.8rem', padding:'.5rem 0', borderBottom:'1px solid var(--rule)'}}>
+      <span className="small" style={{width:'8rem', flex:'0 0 auto'}}>{label}</span>
+      {empty
+        ? <span className="small" style={{color:'var(--muted)', fontStyle:'italic'}}>미확인{hint ? ` — ${hint}` : ''}</span>
+        : <span>{value}</span>}
+    </div>
+  );
+}
+
+function Profile({d}) {
+  const p = d.profile || {};
+  const hasName = !!p.name;
+  const certs = p.certifications || [];
+  const edu = p.education || [];
+  const pubs = p.publications || [];
+  const career = p.career || {};
+  const history = career.history || [];
+  const org = p.organization || {};
+  const track = p.track_record || {};
+  const contact = p.contact || {};
+  const target = p.target_priority || {};
+  const region = p.region_priority || {};
+
+  if (!hasName) {
+    return (
+      <Fragment>
+        <h2 className="sec-title">프로필</h2>
+        <Call tone="warn" label="프로필 없음">
+          <p><span className="mono">config/profile.yaml</span> 을 찾지 못했거나 비어 있습니다.
+            프로젝트 루트에서 파일을 만든 뒤 <span className="mono">python dashboard/build_data.py</span> 를 다시 실행하세요.</p>
+        </Call>
+      </Fragment>
+    );
+  }
+
+  return (
+    <Fragment>
+      <h2 className="sec-title">프로필 — {p.name}{org.title ? ` ${org.title}` : (p.title ? ` ${p.title}` : '')}</h2>
+      <p className="sec-desc">공고 적합도 스코어링과 사업계획서 오너 인터뷰(Phase 2)의 기초 데이터입니다.
+        <span className="mono"> config/profile.yaml</span> 을 직접 편집하면 이 화면에 그대로 반영됩니다(NFR-01) — 대시보드는 이 파일을 읽기만 합니다.
+        {p.source && <Fragment> 원본 서식: <span className="mono">{p.source}</span></Fragment>}</p>
+
+      <dl className="kpis">
+        <Kpi label="경력" value={career.years ? `${career.years}년` : '미확인'} note={career.scope || ''} />
+        <Kpi label="주력 분야" value={p.main_field || '미확인'} note={p.secondary_field ? `+ ${p.secondary_field}` : ''} />
+        <Kpi label="학위" value={edu.length ? (edu[edu.length-1].degree || '') : '미확인'} note={edu.length ? edu[edu.length-1].major : ''} />
+        <Kpi label="자격증" value={certs.length} tone={certs.length ? 'ok' : 'warn'} note={certs.length ? '' : '미등록'} />
+      </dl>
+
+      <div className="panel">
+        <h3>기본 정보</h3>
+        <Field label="이름" value={p.name} />
+        <Field label="직함" value={org.title || p.title} />
+        <Field label="소속기관" value={org.name} hint="TODO" />
+        <Field label="업종 분야" value={org.field} />
+        <Field label="기관 주소" value={org.address} hint="TODO" />
+        <Field label="연락처" value={[contact.phone, contact.email].filter(Boolean).join(' · ')} hint="TODO" />
+        {(() => {
+          const br = p.business_registration;
+          if (br && typeof br === 'object') {
+            return (
+              <Fragment>
+                <Field label="사업자등록번호" value={br.number} />
+                <Field label="과세 유형" value={br.status} />
+                <Field label="개업일" value={br.opened_at} />
+                <Field label="발급기관" value={br.issuing_office} />
+                <Field label="업태·종목" value={(br.business_type || []).join(' / ')} />
+                {br.note && <Call tone="warn" style={{marginTop:'.6rem'}}><p className="small">{br.note}</p></Call>}
+              </Fragment>
+            );
+          }
+          return <Field label="사업자등록번호" value={br} hint="TODO" />;
+        })()}
+      </div>
+
+      <div className="panel" style={{marginTop:'1rem'}}>
+        <h3>학력 {edu.length}건</h3>
+        {edu.length === 0 ? (
+          <p className="small">등록된 학력이 없습니다.</p>
+        ) : (
+          <ul style={{paddingLeft:'1.2rem', margin:0}}>
+            {edu.map((e, i) => (
+              <li key={i} className="small" style={{marginBottom:'.3rem'}}>
+                <span className="mono">{e.period}</span> · {e.school} {e.major}<b> {e.degree}</b>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="panel" style={{marginTop:'1rem'}}>
+        <h3>경력·실적</h3>
+        <Field label="주력 분야" value={p.main_field} />
+        <Field label="지자체·공공기관 위탁" value={career.years ? `${career.years}년 (${career.scope || ''})` : null} />
+        <Field label="사업 형태" value={career.business_type} />
+        <Field label="참여 규모" value={track.participants_mentioned ? `약 ${track.participants_mentioned.toLocaleString()}명 언급` : null} />
+        {track.participants_mentioned != null && !track.verified && (
+          <Call tone="warn" label="검증 필요" style={{marginTop:'.6rem'}}>
+            <p>회의록 STT 자동전사에서 나온 수치라 오인식 가능성이 있습니다.
+              최은희 지도사가 확인하면 <span className="mono">config/profile.yaml</span> 의 <span className="mono">track_record.verified</span> 를 <span className="mono">true</span> 로 바꿔주세요.</p>
+          </Call>
+        )}
+        {history.length > 0 && (
+          <Fragment>
+            <p className="small" style={{margin:'.9rem 0 .4rem'}}><b>경력 이력</b></p>
+            <ul style={{paddingLeft:'1.2rem', margin:0}}>
+              {history.map((h, i) => (
+                <li key={i} className="small" style={{marginBottom:'.3rem'}}>
+                  <span className="mono">{h.period}</span> · {h.org}{h.role ? ` — ${h.role}` : ''}{h.work ? ` (${h.work})` : ''}
+                </li>
+              ))}
+            </ul>
+          </Fragment>
+        )}
+      </div>
+
+      <div className="panel" style={{marginTop:'1rem'}}>
+        <h3>자격증 {certs.length}건</h3>
+        {certs.length === 0 ? (
+          <p className="small">등록된 자격증이 없습니다 — <span className="mono">config/profile.yaml</span> 의 <span className="mono">certifications</span> 에 추가해주세요.</p>
+        ) : (
+          <ul style={{paddingLeft:'1.2rem', margin:0}}>
+            {certs.map((c, i) => (
+              <li key={i} className="small" style={{marginBottom:'.3rem'}}>
+                {typeof c === 'string' ? c : `${c.name || ''}${c.issuer ? ` — ${c.issuer}` : ''}${c.date ? ` (${c.date})` : c.year ? ` (${c.year})` : ''}`}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {pubs.length > 0 && (
+        <div className="panel" style={{marginTop:'1rem'}}>
+          <h3>논문·특기사항 {pubs.length}건</h3>
+          <p className="small" style={{marginTop:0}}>사업계획서 "수행역량" 섹션의 근거 인용 후보입니다(§5.3.7 RAG 검색 대상 — 과거제안서 축과 함께 사용).</p>
+          <ul style={{paddingLeft:'1.2rem', margin:0}}>
+            {pubs.map((x, i) => (
+              <li key={i} className="small" style={{marginBottom:'.3rem'}}>
+                <Chip>{x.type}</Chip> {x.title}{x.venue ? ` — ${x.venue}` : ''}{x.year ? ` (${x.year})` : ''}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div className="panel" style={{marginTop:'1rem'}}>
+        <h3>타깃·지역 우선순위 <Chip k="warn">미확정</Chip></h3>
+        <Field label="타깃 후보" value={(target.candidates || []).join(' · ')} />
+        <Field label="타깃 확정" value={target.confirmed} hint="PRD Q2 — 미확정" />
+        <Field label="지역 기본" value={region.default} />
+        <Field label="지역 우선" value={region.emphasis} />
+        {region.assumed && (
+          <Call tone="info" style={{marginTop:'.6rem'}}>
+            <p>지역 범위는 아직 최은희 지도사가 직접 확정하지 않은 <b>가정치</b>입니다(ADR-006 근거로 전국 기본 + 서울 우선을 가정). PRD §8 Q3 참조.</p>
+          </Call>
+        )}
+      </div>
+    </Fragment>
+  );
+}
+
+/* ─────────────── 탭: 전문가 풀 ─────────────── */
+
+function Experts({d}) {
+  const experts = d.experts || [];
+  const [q, setQ] = useState('');
+  const [type, setType] = useState('전체');
+
+  const types = useMemo(() => ['전체', ...new Set(experts.map(e => e.type))], [experts]);
+  const rows = useMemo(() => experts.filter(e => {
+    if (type !== '전체' && e.type !== type) return false;
+    if (!q) return true;
+    const s = q.toLowerCase();
+    return ['name','program','affiliation','qualification','contact']
+      .some(k => (e[k] || '').toLowerCase().includes(s));
+  }), [experts, q, type]);
+
+  const typeRows = useMemo(() => {
+    const m = {};
+    experts.forEach(e => { m[e.type] = (m[e.type] || 0) + 1; });
+    return Object.entries(m).map(([label, value]) => ({label, value})).sort((a,b) => b.value - a.value);
+  }, [experts]);
+
+  return (
+    <Fragment>
+      <h2 className="sec-title">전문가 풀 {experts.length}건</h2>
+      <p className="sec-desc">"프로그램명 → 섭외 가능한 전문가" 인덱스입니다. 공고 하나를 보고
+        <b> 이 프로그램에 누구를 섭외하지, 어떻게 연락하지</b>를 바로 찾을 때 씁니다.
+        원본은 <span className="mono">docs/research/P2_프로그램명_전문가인덱스.md</span> — 이 파일을 고치고
+        다시 빌드하면 여기도 그대로 바뀝니다.</p>
+      <Call tone="warn" label="전제 — 플랫폼은 제휴 주체가 아니다">
+        <p>웃는코끼리·마보·하루명상은 개인사업자·프리랜서 전문가가 자기 프로그램을 올려두는 장터/앱입니다.
+          기관 대 기관 MOU로 소속 전문가 전원을 대표하지 못합니다. <b>제휴는 언제나 개인 전문가 단위</b>로
+          이뤄집니다 — 그래서 "소속"란에는 항상 그 사람의 실제 소속기관을 적었고, 플랫폼명은 어디서 찾았는지
+          참고용으로만 남겼습니다.</p>
+      </Call>
+      <div className="panel" style={{marginBottom:'1.1rem'}}>
+        <h3>유형별 분포</h3>
+        <Bars rows={typeRows} />
+      </div>
+      <div className="controls">
+        <input type="search" aria-label="전문가 검색" value={q}
+               onChange={e => setQ(e.target.value)} placeholder="이름·프로그램·소속·자격·연락처 검색…" />
+        <select aria-label="유형 필터" value={type} onChange={e => setType(e.target.value)}>
+          {types.map(t => <option key={t} value={t}>{t === '전체' ? '유형 — 전체' : t}</option>)}
+        </select>
+        <span className="count">{rows.length.toLocaleString()} / {experts.length.toLocaleString()}</span>
+      </div>
+      <DataTable
+        emptyHint={q ? `"${q}" 로는 찾지 못했습니다.` : '선택한 유형에 해당하는 전문가가 없습니다.'}
+        onReset={() => { setQ(''); setType('전체'); }}
+        csvName="choi_전문가풀.csv"
+        initialSort={{key:'type', dir:'asc'}}
+        columns={[
+          {key:'type', label:'유형', render:r => <Chip>{r.type}</Chip>},
+          {key:'program', label:'프로그램'},
+          {key:'name', label:'이름', render:r => <b>{r.name}</b>},
+          {key:'affiliation', label:'소속', render:r => <span className="small">{r.affiliation}</span>},
+          {key:'qualification', label:'자격', render:r => <span className="small">{r.qualification}</span>},
+          {key:'contact', label:'연락처', render:r => <span className="mono small">{r.contact}</span>},
+        ]}
+        rows={rows}
+      />
+    </Fragment>
+  );
+}
+
+/* ─────────────── 탭: 구현 계획 ─────────────── */
+
+function Roadmap({d}) {
+  const phases = [
+    {id:'Step 1.0', name:'전수 채널 조사', status:'done', body:'18 에이전트 · 채널 203개 발굴·실측 · 시장 4축. 산출: S1~S5 문서, keywords.yaml 초안'},
+    {id:'Step 1.1', name:'API 인증키 + 실호출 검증', status:'done', body:'4종 자동승인 즉시 발급 · 4/4 HTTP 200 · 키워드 히트 실측으로 우선순위 확정. 국고보조금 성격 정정(ADR-013)'},
+    {id:'Step 1.2', name:'Supabase aicamp_choi 룸', status:'blocked', body:'스키마 SQL 작성 완료 (테이블 15종). DB 503으로 적용 대기 — Auth는 정상이므로 PostgREST/컴퓨트 이슈'},
+    {id:'Step 1.3', name:'API 수집기 3종 (증분수집)', status:'todo', body:'나라장터 용역 · 기업마당(XML) · K-Startup. state 기반 증분, 장애 격리, 멱등성 검증'},
+    {id:'Step 1.4', name:'HTML/RSS 수집기 4종', status:'todo', body:'문화포털 · 투어라즈 · 복지넷(목록만) · 복지부 RSS. robots 준수 게이트 필수'},
+    {id:'Step 1.5', name:'키워드 게이트 + 골든셋 평가', status:'todo', body:'precision/recall 측정 → exclude 보강 → 개선 수치 증명. recall 우선'},
+    {id:'Step 1.6', name:'RAG 인제스트 (벡터화)', status:'todo', body:'ko-sroberta 768d · 섹션 단위 청크 · pgvector HNSW · 하이브리드 검색'},
+    {id:'Step 1.7', name:'스코어링 + 브리핑', status:'todo', body:'적합도 가중합 + 근거 문장 → Markdown/Excel. ★최종 게이트: 최은희 지도사 육안 판정'},
+    {id:'Phase 2', name:'사업계획서 RAG 생성', status:'future', body:'공고 배점표 → 목차 → 섹션별 RAG 검색 → 인용 강제 생성 → 검토 루프'},
+    {id:'Phase 3', name:'수행관리 PMS', status:'future', body:'e나라도움 대체가 아니라 입력준비·증빙 사전검증·기한알림 계층. 테이블 13종 초안'},
+  ];
+  const tone = {done:'ok', blocked:'crit', todo:'', future:'info'};
+  const label = {done:'완료', blocked:'차단', todo:'대기', future:'예정'};
+
+  return (
+    <Fragment>
+      <h2 className="sec-title">구현 로드맵</h2>
+      <p className="sec-desc">이 대시보드는 <b>Step 1.0~1.1의 산출물</b>입니다. 전체 확장 경로 안에서 지금 어디에 있는지 보여줍니다.</p>
+      {phases.map(p => (
+        <details key={p.id} open={p.status === 'blocked'}>
+          <summary>
+            <span className="rank">{p.id}</span>
+            <span style={{flex:1}}>{p.name}</span>
+            <Chip k={tone[p.status]}>{label[p.status]}</Chip>
+          </summary>
+          <div className="body">{p.body}</div>
+        </details>
+      ))}
+
+      <div className="panel" style={{marginTop:'1.2rem'}}>
+        <h3>수집·정규화 구현 단계 (조사 제안 {d.ingest_steps.length}단계)</h3>
+        {d.ingest_steps.map((s, i) => (
+          <details key={i}>
+            <summary><span className="rank">{s.step}</span><span style={{flex:1}}>{s.title}</span>
+              <Chip>{s.effort_hours || '?'}</Chip></summary>
+            <div className="body"><b>작업</b> — {s.work}{'\n\n'}<b>검증</b> — {s.verification}</div>
+          </details>
+        ))}
+      </div>
+
+      <div className="panel" style={{marginTop:'.9rem'}}>
+        <h3>Phase 3 PMS 데이터 모델 {d.pms_model.length}종</h3>
+        <DataTable columns={[
+          {key:'table', label:'테이블', cls:'mono', render:r => <b className="mono">{r.table}</b>},
+          {key:'purpose', label:'목적', render:r => <span className="small">{r.purpose}</span>},
+          {key:'basis', label:'근거 서식·절차', render:r => <span className="small">{r.basis}</span>},
+        ]} rows={d.pms_model} />
+      </div>
+    </Fragment>
+  );
+}
+
+/* ─────────────── 탭: 리스크 ─────────────── */
+
+function Risks({d}) {
+  return (
+    <Fragment>
+      <h2 className="sec-title">라이선스 경고 · 미해결 질문</h2>
+      <p className="sec-desc">조사가 스스로 밝힌 한계와 주의사항입니다. <b>모르는 것을 아는 것</b>이 이 프로젝트에서 가장 비싼 실수를 막습니다.</p>
+
+      {d.narrative && (
+        <div className="panel" style={{marginBottom:'1rem'}}>
+          <h3>판정 근거 원문</h3>
+          <p className="small" style={{marginTop:0}}>
+            아래는 조사가 내린 판정의 근거 전문입니다. 화면 곳곳의 결론이 여기서 나왔습니다.
+          </p>
+          {[['hwp_risk','HWP 첨부 리스크 판정'],
+            ['api_verdict','공고 API 실재성 최종 판정'],
+            ['data_strategy_summary','공공데이터 활용전략 총평']].map(([k, title]) =>
+            d.narrative[k] ? (
+              <details key={k}>
+                <summary>{title}</summary>
+                <div className="body prose">{d.narrative[k]}</div>
+              </details>
+            ) : null)}
+        </div>
+      )}
+
+      <div className="panel" style={{marginBottom:'1rem'}}>
+        <h3>라이선스 경고 {d.license_warnings.length}건</h3>
+        {d.license_warnings.map((w, i) => {
+          const crit = /사용 금지|prohibited|제4유형/.test(w);
+          const warn = /가공 제약|제3유형|확인 필요|승인 리스크/.test(w);
+          return (
+            <details key={i} open={i === 0}>
+              <summary>
+                <Chip k={crit ? 'crit' : warn ? 'warn' : 'ok'}>{crit ? '금지' : warn ? '제약' : '해소'}</Chip>
+                <span style={{flex:1}}>{w.slice(0, 90)}…</span>
+              </summary>
+              <div className="body">{w}</div>
+            </details>
+          );
+        })}
+      </div>
+
+      <OpenQuestions items={d.open_questions} />
+    </Fragment>
+  );
+}
+
+function OpenQuestions({items}) {
+  const [q, setQ] = useState('');
+  const hit = items.filter(x => !q || x.includes(q));
+  return (
+    <div className="panel">
+      <h3>미해결 질문 {items.length}건</h3>
+      <p className="small" style={{marginTop:0}}>다음 라운드 조사·확인 대상입니다.</p>
+      <div className="controls">
+        <input type="search" aria-label="미해결 질문 검색" value={q}
+               onChange={e => setQ(e.target.value)} placeholder="질문 검색… (예: 라이선스, 지자체)" />
+        <span className="count">{hit.length} / {items.length}</span>
+      </div>
+      {hit.length ? (
+        <ul style={{fontSize:'.87rem', color:'var(--ink-2)', lineHeight:1.7, paddingLeft:'1.2rem'}}>
+          {hit.map((x, i) => <li key={i} style={{marginBottom:'.4rem'}}>{x}</li>)}
+        </ul>
+      ) : (
+        <div style={{padding:'1.2rem 0'}}>
+          <p className="empty-h">"{q}" 로는 찾지 못했습니다</p>
+          <button type="button" className="pill" onClick={() => setQ('')}>검색 초기화</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─────────────── 앱 ─────────────── */
+
+// group 은 성격이다 — 진단(무엇을 알았나) / 자료(무엇을 찾았나) / 실행(무엇을 할까)
+const TABS = [
+  {id:'overview',  group:'진단', label:'개요',        C:Overview,  n:d => null},
+  {id:'market',    group:'진단', label:'시장·시설자금', C:Market,    n:d => null},
+  {id:'priority',  group:'자료', label:'우선순위',     C:Priority,  n:d => d.priority_channels.length},
+  {id:'channels',  group:'자료', label:'채널',        C:Channels,  n:d => d.channels.length},
+  {id:'programs',  group:'자료', label:'공고 사례',    C:Programs,  n:d => d.programs.length},
+  {id:'datasets',  group:'자료', label:'공공데이터',   C:Datasets,  n:d => d.datasets.length},
+  {id:'keywords',  group:'자료', label:'키워드',      C:Keywords,  n:d => Object.values(d.keywords).flat().length},
+  {id:'profile',   group:'실행', label:'프로필',      C:Profile,   n:d => null},
+  {id:'experts',   group:'실행', label:'전문가 풀',    C:Experts,   n:d => (d.experts || []).length},
+  {id:'roadmap',   group:'실행', label:'로드맵',      C:Roadmap,   n:d => null},
+  {id:'risks',     group:'실행', label:'리스크',      C:Risks,     n:d => d.license_warnings.length + d.open_questions.length},
+];
+
+function App() {
+  const [data, setData] = useState(null);
+  const [live, setLive] = useState(null);
+  const [err, setErr] = useState(null);
+  const [tab, setTab] = useState(() => location.hash.slice(1) || 'overview');
+
+  useEffect(() => {
+    // 1순위: data.js 가 심어둔 전역 (file:// 더블클릭에서도 동작)
+    if (window.CHOI_DATA) { setData(window.CHOI_DATA); }
+    else {
+      // 2순위: 서버로 열었을 때만 가능한 fetch
+      fetch('./data.json')
+        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(setData)
+        .catch(() => setErr('데이터를 불러오지 못했습니다. dashboard 폴더에 data.js 가 있는지 확인하세요.'));
+    }
+    // 시장 정량조사 결과 — 있으면 얹고 없으면 조용히 넘어간다
+    if (window.CHOI_MARKET) setLive(window.CHOI_MARKET);
+    else fetch('./market.json').then(r => r.ok ? r.json() : null).then(m => m && setLive(m)).catch(() => {});
+  }, []);
+
+  useEffect(() => { location.hash = tab; }, [tab]);
+
+  // 다크 토큰이 CSS 에 완성돼 있는데 data-theme 을 세우는 코드가 없어 발동한 적이 없었다.
+  // localStorage 는 사생활 모드·차단 설정에서 던지므로 반드시 감싼다.
+  useEffect(() => {
+    try {
+      const t = localStorage.getItem('choi-theme');
+      if (t) document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  }, []);
+
+  if (err) return (
+    <div className="wrap" style={{paddingTop:'3rem'}}>
+      <Call tone="crit" label="불러오기 실패">
+        <p>{err}</p>
+        <p className="small">데이터 파일을 다시 만들려면 프로젝트 루트에서:</p>
+        <p className="mono small">python dashboard/build_data.py</p>
+        <p className="small">그래도 안 되면 로컬 서버로 여세요:
+          <span className="mono"> python -m http.server 8099 --directory dashboard</span></p>
+      </Call>
+    </div>
+  );
+  if (!data) return <div className="loading">데이터를 불러오는 중…</div>;
+
+  const Active = TABS.find(t => t.id === tab)?.C || Overview;
+
+  return (
+    <Fragment>
+      <header className="mast">
+        <div className="wrap mast-inner">
+          <div className="mast-top">
+            <div className="brand">
+              <span className="sub">CHOI · 1단계</span>
+              <h1>명상·심리치유 공모사업 대시보드</h1>
+            </div>
+            <div className="mast-meta">
+              <button type="button" className="pill" style={{marginRight:'.4rem'}}
+                onClick={() => {
+                  const cur = document.documentElement.getAttribute('data-theme');
+                  const next = cur === 'dark' ? 'light' : 'dark';
+                  document.documentElement.setAttribute('data-theme', next);
+                  try { localStorage.setItem('choi-theme', next); } catch (e) {}
+                }}>화면 밝기</button>
+              <span>조사 {data.generated_at}</span>
+              <span>채널 {data.channels.length}</span>
+              <span>데이터셋 {data.datasets.length}</span>
+              <span>공고사례 {data.programs.length}</span>
+            </div>
+          </div>
+          {/* 탭 위젯이 아니라 해시 라우팅 페이지 전환이다.
+              role="tablist" 는 방향키 이동을 약속하는데 그 약속을 지키지 않으므로 aria-current 를 쓴다. */}
+          <nav aria-label="대시보드 섹션">
+            {TABS.map((t, i) => {
+              const n = t.n(data);
+              return (
+                <Fragment key={t.id}>
+                  {i > 0 && TABS[i-1].group !== t.group && <span className="nav-sep" aria-hidden="true" />}
+                  <button type="button" aria-current={tab === t.id ? 'page' : undefined}
+                          onClick={() => setTab(t.id)}>
+                    {t.label}{n != null && <span className="n">{n}</span>}
+                  </button>
+                </Fragment>
+              );
+            })}
+          </nav>
+        </div>
+      </header>
+      <main><div className="wrap"><Active d={data} live={live} /></div></main>
+      <footer><div className="wrap">
+        <p style={{margin:'0 0 .5rem'}}><b>정본 경로</b></p>
+        <p className="path" style={{margin:'0 0 .2rem'}}>C:\AICAMP_CHOI\dashboard\index.html</p>
+        <p className="path" style={{margin:'0 0 .7rem'}}>C:\AICAMP_CHOI\dashboard\data.js · market.js</p>
+        <p style={{margin:'0 0 .4rem'}}>빌드 도구 없음 — React UMD + Babel standalone.
+          데이터는 <span className="mono">data.js</span> 가 심는 전역이라 <b>파일을 더블클릭해도 열립니다.</b></p>
+        <p style={{margin:0}}>데이터 갱신: <span className="mono">python dashboard/build_data.py</span></p>
+      </div></footer>
+    </Fragment>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
