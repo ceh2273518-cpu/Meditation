@@ -11,7 +11,7 @@
 :root{
   --paper:#F6F8F6; --surface:#FFFFFF; --sunken:#EDF1EE; --ink:#151E1B; --ink-2:#3A4744;
   --muted:#5E6A65; --rule:#DCE3DF; --rule-strong:#C2CDC7;
-  --accent:#2F6F62; --accent-soft:#E1EEE9;
+  --accent:#2F6F62; --accent-soft:#E1EEE9; --on-accent:#FFFFFF;
   --signal:#8A5A12; --signal-soft:#F6ECDA;
   --critical:#993A30; --critical-soft:#F7E4E1;
   --info:#2C5A80; --info-soft:#E2ECF4;
@@ -25,7 +25,7 @@
   :root:not([data-theme="light"]){
     --paper:#101614; --surface:#18201D; --sunken:#141B19; --ink:#E7EDE9; --ink-2:#BAC6C1;
     --muted:#8B9994; --rule:#2A3531; --rule-strong:#3C4A45;
-    --accent:#74C4AE; --accent-soft:#1B2E29;
+    --accent:#74C4AE; --accent-soft:#1B2E29; --on-accent:#0C1210; --on-accent:#0C1210;
     --signal:#D8A75E; --signal-soft:#2E2519;
     --critical:#E28D80; --critical-soft:#33201D;
     --info:#7FB0D6; --info-soft:#182632;
@@ -35,7 +35,7 @@
 :root[data-theme="dark"]{
   --paper:#101614; --surface:#18201D; --sunken:#141B19; --ink:#E7EDE9; --ink-2:#BAC6C1;
   --muted:#8B9994; --rule:#2A3531; --rule-strong:#3C4A45;
-  --accent:#74C4AE; --accent-soft:#1B2E29;
+  --accent:#74C4AE; --accent-soft:#1B2E29; --on-accent:#0C1210;
   --signal:#D8A75E; --signal-soft:#2E2519;
   --critical:#E28D80; --critical-soft:#33201D;
   --info:#7FB0D6; --info-soft:#182632;
@@ -122,6 +122,26 @@ a:hover{border-bottom-color:var(--accent)}
 .chip.info{color:var(--info);border-color:var(--info);background:var(--info-soft)}
 .chips{display:flex;flex-wrap:wrap;gap:.32rem}
 
+/* 사용법 탭 — 마크다운 렌더 (기존 색 토큰만 씀) */
+.md-body{max-width:74ch;line-height:1.75}
+.md-p{margin:10px 0;color:var(--ink)}
+.md-ol{margin:.4rem 0 .6rem;padding-left:1.4rem}
+.md-ol li{margin-bottom:.25rem}
+.md-ul{margin:8px 0 12px 1.1rem;padding:0}
+.md-ul li{margin:4px 0}
+.md-quote{margin:12px 0;padding:10px 14px;border-left:3px solid var(--accent);
+  background:var(--sunken);border-radius:0 4px 4px 0;color:var(--ink-2)}
+.md-quote b{color:var(--ink)}
+.md-pre{margin:10px 0;padding:12px 14px;background:var(--sunken);border:1px solid var(--rule);
+  border-radius:6px;overflow-x:auto;font-family:var(--f-mono);font-size:.84rem;line-height:1.6}
+.md-table{border-collapse:collapse;margin:12px 0;font-size:.88rem;min-width:100%}
+.md-table th{text-align:left;padding:7px 11px;border-bottom:2px solid var(--rule-strong);
+  color:var(--muted);font-weight:600;white-space:nowrap}
+.md-table td{padding:7px 11px;border-bottom:1px solid var(--rule);vertical-align:top}
+.md-table tr:last-child td{border-bottom:none}
+.md-body code{background:var(--sunken);padding:1px 5px;border-radius:3px;
+  font-family:var(--f-mono);font-size:.86em}
+
 /* 정렬 헤더 — th 는 포커스를 못 받으므로 안에 native button 을 넣는다 (WCAG 2.1.1) */
 .th-sort{all:unset;display:flex;gap:.3rem;align-items:center;justify-content:space-between;
   width:100%;padding:.55rem .75rem;cursor:pointer;box-sizing:border-box;
@@ -155,7 +175,10 @@ input[type=search]{flex:1;min-width:190px}
 .bars{display:flex;flex-direction:column;gap:.5rem}
 .bar-row{display:grid;grid-template-columns:minmax(90px,150px) 1fr auto;gap:.7rem;align-items:center;font-size:.84rem}
 .bar-track{background:var(--sunken);border-radius:2px;height:16px;overflow:hidden;border:1px solid var(--rule)}
-.bar-fill{height:100%;background:var(--accent);border-radius:1px}
+/* display:block 이 없으면 span 이 inline 이라 width·height 가 통째로 무시된다.
+   트랙은 grid item 이라 자동으로 block 이 되지만 그 자식인 fill 은 아니다 —
+   실측에서 fill 의 실제 크기가 0×0 이었다(막대가 전부 빈 채로 보였다). */
+.bar-fill{display:block;height:100%;background:var(--accent);border-radius:1px;min-width:2px}
 .bar-fill.warn{background:var(--signal)} .bar-fill.crit{background:var(--critical)} .bar-fill.info{background:var(--info)}
 .bar-val{font-family:var(--f-mono);font-size:.76rem;color:var(--muted);font-variant-numeric:tabular-nums;min-width:44px;text-align:right}
 
@@ -174,10 +197,185 @@ details .body{padding:0 .95rem .9rem 2.1rem;font-size:.88rem;color:var(--ink-2);
 .loading{padding:4rem 0;text-align:center;color:var(--muted);font-family:var(--f-mono);font-size:.85rem}
 footer{border-top:1px solid var(--rule);background:var(--sunken);margin-top:3rem;padding:1.6rem 0 2.4rem}
 footer .wrap{font-size:.8rem;color:var(--muted)}
+.nav-act{appearance:none;border:1px solid var(--accent);border-radius:8px;
+  background:var(--accent-soft);color:var(--accent);font-family:var(--f-body);
+  font-size:.82rem;font-weight:700;padding:.35rem .7rem;margin:0 .3rem;
+  cursor:pointer;align-self:center;white-space:nowrap}
+.nav-act:hover{background:var(--accent);color:var(--on-accent)}
+.rfBar{height:10px;background:var(--sunken);border-radius:5px;overflow:hidden}
+.rfBar i{display:block;height:100%;background:var(--accent);border-radius:5px;
+  transition:width .6s}
+
+/* ── 전역 AI 제안 ── */
+.aiFab{position:fixed;right:18px;bottom:18px;z-index:90;
+  background:var(--accent);color:var(--on-accent);border:0;border-radius:99px;
+  padding:.7rem 1.15rem;font-family:var(--f-body);font-size:.92rem;font-weight:700;
+  cursor:pointer;box-shadow:var(--shadow)}
+.aiFab:hover{filter:brightness(1.08)}
+.aiDrawer{position:fixed;right:18px;bottom:74px;z-index:91;
+  width:min(430px,calc(100vw - 36px));max-height:min(72vh,640px);overflow-y:auto;
+  background:var(--surface);border:1px solid var(--rule-strong);border-radius:12px;
+  padding:14px 16px;box-shadow:var(--shadow)}
+.aiHead{display:flex;align-items:center;justify-content:space-between;gap:6px;
+  margin-bottom:8px;flex-wrap:wrap}
+.aiDrag{cursor:move;touch-action:none;user-select:none;
+  margin:-14px -16px 8px;padding:10px 16px 8px;
+  border-bottom:1px solid var(--rule);border-radius:12px 12px 0 0;
+  background:var(--sunken)}
+.aiDrag:active{cursor:grabbing}
+/* 작업줄 — 잠깐 내려 두고 본문을 읽을 때 */
+.aiBar{position:fixed;left:12px;right:12px;bottom:12px;z-index:91;
+  display:flex;align-items:center;gap:10px;cursor:pointer;
+  background:var(--surface);border:1px solid var(--accent);border-radius:10px;
+  padding:.5rem .8rem;box-shadow:var(--shadow)}
+.aiBar:hover{background:var(--accent-soft)}
+@media (min-width:900px){.aiBar{left:auto;width:min(560px,60vw)}}
+.aiBody{font-size:.86rem;line-height:1.65}
+.aiBody table{min-width:0}
+@media (max-width:640px){
+  .aiDrawer{right:10px;left:10px;width:auto;bottom:70px}
+  .aiFab{right:12px;bottom:12px}
+}
+
+.aiPick{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.webTgl{flex:0 0 auto;font-size:.76rem;padding:.3rem .5rem;white-space:nowrap}
+.webTgl.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);
+  font-weight:600}
+.webCite{margin:.3rem 0 0;padding-left:1.2rem}
+.webCite li{margin-bottom:.15rem;word-break:break-word}
+.aiPick select{flex:1;min-width:0;font-size:.8rem;padding:.3rem .45rem}
+.aiLog{max-height:46vh;overflow-y:auto;margin-bottom:8px;padding-right:2px}
+.aiMsg{display:flex;margin-bottom:8px}
+.aiMsg.user{justify-content:flex-end}
+.aiBubble{max-width:92%;padding:.5rem .7rem;border-radius:10px;font-size:.85rem;line-height:1.6}
+.aiBubble.u{background:var(--accent-soft);border:1px solid var(--accent);color:var(--ink)}
+.aiBubble.a{background:var(--sunken);border:1px solid var(--rule)}
+.aiInput{display:flex;gap:6px}
+.aiInput input{flex:1;min-width:0}
+
+.kwChip{appearance:none;font-family:var(--f-body);font-size:.8rem;cursor:pointer;
+  padding:.28rem .6rem;border-radius:6px;border:1px solid var(--rule-strong);
+  background:var(--surface);color:var(--ink-2);transition:all .12s}
+.kwChip:hover{border-color:var(--accent);color:var(--accent)}
+.kwChip.t-ok{border-color:var(--accent);color:var(--accent)}
+.kwChip.t-crit{border-color:var(--critical);color:var(--critical)}
+.kwChip.t-info{border-color:var(--info);color:var(--info)}
+.kwChip.on{background:var(--accent);border-color:var(--accent);
+  color:var(--on-accent);font-weight:700}
+.kwChip.on.t-crit{background:var(--critical);border-color:var(--critical)}
+@media (pointer:coarse){.kwChip{min-height:40px;padding:.45rem .7rem}}
+
+/* ── 키워드 네트워크 ── */
+.knGrid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:.8rem}
+.knCanvasBox{padding:.8rem .9rem}
+.knCanvas{width:100%;height:430px;display:block;cursor:grab;touch-action:none;margin-top:6px}
+.knCanvas:active{cursor:grabbing}
+.knLegend{display:flex;gap:.9rem;flex-wrap:wrap;margin-top:4px;color:var(--muted)}
+.knLegend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.knSide{max-height:560px;overflow-y:auto}
+.knBar{display:flex;align-items:center;gap:8px;padding:3px 0;cursor:pointer}
+.knBar:hover .knBarName{color:var(--accent)}
+.knBarName{flex:0 0 96px;font-size:.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.knBarTrack{flex:1;height:8px;background:var(--sunken);border-radius:4px;overflow:hidden}
+.knBarTrack i{display:block;height:100%;background:var(--accent);border-radius:4px}
+.knTrend{display:flex;gap:4px;align-items:flex-end}
+.knTrend>div{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1}
+.knTrend i{display:block;width:100%;max-width:26px;background:var(--accent);border-radius:3px 3px 0 0;opacity:.85}
+.knTrend span{font-size:.62rem;color:var(--muted);font-family:var(--f-mono)}
+.knRag{border-left:3px solid var(--rule-strong);padding:4px 0 4px 10px;margin-bottom:8px}
+.knRag blockquote{margin:.3rem 0 0;color:var(--ink-2);font-style:normal}
+@media (max-width:900px){.knGrid{grid-template-columns:1fr}.knCanvas{height:330px}.knSide{max-height:none}}
+
+.srcTabs{display:flex;gap:.5rem;flex-wrap:wrap}
+.srcTab{flex:1 1 240px;text-align:left;cursor:pointer;font-family:var(--f-body);
+  background:var(--surface);color:var(--ink-2);border:1px solid var(--rule-strong);
+  border-radius:6px;padding:.55rem .85rem;font-size:.88rem;font-weight:600;
+  transition:border-color .15s,color .15s,background .15s}
+.srcTab span{display:block;font-weight:400;font-size:.74rem;margin-top:.15rem;opacity:.85}
+.srcTab:hover{border-color:var(--accent);color:var(--ink)}
+.srcTab[aria-selected="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 .path{font-family:var(--f-mono);font-size:.72rem;color:var(--ink-2);word-break:break-all}
+/* ── 화면 모드 전환 버튼 ──────────────────────────────────
+   aicoach.camp 방식: 아이콘이 **바뀔 모드**를 가리킨다. 최소 40px 정사각으로
+   손가락 터치를 받는다(iOS 44 / Android 48 권고에 근접). */
+.themeBtn{display:inline-flex;align-items:center;gap:.35rem;min-height:40px;padding:0 .7rem;
+  border:1px solid var(--rule-strong);border-radius:10px;background:var(--surface);
+  color:var(--ink-2);font-family:var(--f-body);font-size:.95rem;cursor:pointer;
+  margin-right:.5rem;transition:border-color .15s,color .15s,background .15s}
+.themeBtn:hover{border-color:var(--accent);color:var(--ink)}
+.themeBtn em{font-style:normal;font-size:.74rem;font-family:var(--f-mono);letter-spacing:.02em}
+
+/* ── 손가락으로 쓰는 기기 (폭과 무관) ────────────────────────
+   폭 조건으로 걸면 **아이폰을 가로로 돌리는 순간 규칙이 꺼진다**(844·932px).
+   iOS 사파리의 포커스 자동 확대는 뷰포트 폭이 아니라 요소의 font-size 로
+   결정되므로, 가로에서도 포커스마다 화면이 튀고 되돌아오지 않았다.
+   터치 타깃도 같은 이유로 폭이 아니라 포인터 종류로 건다. */
+@media (pointer:coarse){
+  input,select,textarea{font-size:16px!important}
+  .btn,.pill,.themeBtn{min-height:44px}
+  .th-sort{min-height:44px}
+  details summary{min-height:48px;align-items:center}
+  /* 표 안 링크: 밑줄이 :hover 에서만 켜져 터치 기기엔 영영 안 보였다 */
+  td a{display:inline-block;padding:.5rem 0;border-bottom-color:var(--accent)}
+}
+
+/* ── 모바일 (~640px) ──────────────────────────────────────
+   실측 근거(375px): 헤더가 세로를 크게 먹고, 인라인 width 가 박힌 입력들이
+   뷰포트를 넘고, 버튼이 손가락보다 작았다. 스크롤 가능한 표·네비는 그대로 둔다. */
 @media (max-width:640px){
   body{font-size:15px}
   .bar-row{grid-template-columns:minmax(70px,110px) 1fr auto}
+
+  /* 좌우 여백을 줄여 본문 폭을 되찾는다 (2.5rem -> 1.5rem) */
+  .wrap{width:min(1240px,100% - 1.5rem)}
+
+  /* 머리말: 제목을 줄이고 통계는 접는다 — 세로가 가장 귀한 자원이다 */
+  .mast-inner{padding-top:.7rem;gap:.55rem}
+  .mast-top{align-items:center}
+  .brand h1{font-size:1.02rem;line-height:1.3}
+  .mast-meta{font-size:.66rem;gap:.55rem;width:100%;order:3}
+  .mast-meta span{white-space:nowrap}
+
+  /* 네비: 이미 가로 스크롤이지만 더 있다는 걸 알려 준다 */
+  nav{gap:0;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+      -webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);
+      mask-image:linear-gradient(90deg,#000 88%,transparent)}
+  nav::-webkit-scrollbar{display:none}
+  nav button{padding:.55rem .6rem;font-size:.84rem;min-height:44px}
+
+  /* 인라인 width(240·280·200·120px)가 박힌 입력들 — 좁은 화면에선 전부 폭을 채운다.
+     JSX 인라인 스타일이라 CSS 로 이기려면 !important 가 필요하다. */
+  .controls{gap:.5rem}
+  .controls>input,.controls>select,.controls>.btn{
+    width:100%!important;max-width:none!important;min-width:0}
+  /* 터치 타깃 — 모바일에서 더 여유 있게 */
+  .btn{padding:.6rem .85rem;font-size:.9rem}
+  .pill{min-height:48px;padding:.6rem .95rem}
+  .themeBtn{min-height:48px}
+  .th-sort{min-height:44px;padding:.7rem .75rem}
+
+  /* 드롭존은 한 줄에 하나 — 2열로 붙으면 글자가 세 줄로 접힌다.
+     JSX 에 인라인 flex:1(basis 0%)이 박혀 있어 !important 로 눌러야 한다.
+     (중요도 있는 author 규칙은 인라인 스타일을 이긴다) */
+  .drop{padding:26px 14px}
+  .controls>.drop{flex-basis:100%!important;min-width:0}
+
+  /* 단계 목록의 들여쓰기를 줄여 본문 폭 확보 (34+11 -> 24+9) */
+  .steps>li{padding-left:24px;margin-left:9px}
+  .steps>li::before{left:-11px;width:20px;height:20px;font-size:11px}
+
+  /* 작성 갈래 토글은 세로로 쌓아 두 갈래를 다 보이게 */
+  .srcTab{flex:1 1 100%;min-height:52px}
+
+  /* 표는 .tw 안에서 가로로 스크롤된다 — 높이만 낮춰 화면을 덜 먹게 */
+  .tw{max-height:min(60vh,520px)}
+}
+
+/* 아주 좁은 화면 (~380px) — 통계 **숫자만** 감춰 첫 화면을 비운다.
+   .mast-meta 통째로 숨기면 그 안에 있는 화면 모드 버튼까지 사라진다(실측). */
+@media (max-width:380px){
+  .mast-meta>span{display:none}
+  .brand .sub{font-size:.62rem}
 }
 @media print{
   .tw{max-height:none;overflow:visible}
@@ -186,6 +384,40 @@ footer .wrap{font-size:.8rem;color:var(--muted)}
   details{break-inside:avoid}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ── 작성 준비 탭 (Step 2.4 업로더) ────────────────────────── */
+.drop{border:2px dashed var(--rule);border-radius:10px;padding:22px 16px;text-align:center;
+      background:var(--sunken);transition:border-color .15s,background .15s;cursor:pointer}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop .big{font-size:15px;font-weight:600;margin-bottom:4px}
+.filelist{list-style:none;padding:0;margin:10px 0 0}
+.filelist li{display:flex;gap:10px;align-items:center;padding:7px 10px;border:1px solid var(--rule);
+             border-radius:8px;margin-bottom:6px;background:var(--paper)}
+.filelist .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.filelist .sz{color:var(--muted);font-size:12px;white-space:nowrap}
+.ta{width:100%;min-height:150px;font:13px/1.6 var(--f-mono);padding:10px;border:1px solid var(--rule);
+    border-radius:8px;background:var(--paper);color:var(--ink);resize:vertical}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border:1px solid var(--rule);
+     border-radius:8px;background:var(--paper);color:var(--ink);font-size:13px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+/* 인라인 style 로 버튼을 줄이던 곳이 9군데였다. 인라인은 스타일시트를
+   이기므로 미디어쿼리로 되돌릴 수 없었다 — 클래스로 옮겨 정리한다.
+   높이는 min-height 가 지키고, .sm 은 좌우 여백만 줄인다. */
+.btn.sm{padding:3px 9px;font-size:12px}
+/* 다크 모드의 accent 는 밝은 민트다 — 흰 글자를 얹으면 대비 2.05 로
+   읽히지 않는다(실측). 모드별로 얹을 글자색을 토큰으로 갖는다. */
+.btn.pri{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.hl{background:var(--accent-soft);border-radius:3px;padding:0 2px;font-weight:600}
+.steps{counter-reset:st;list-style:none;padding:0;margin:0}
+.steps>li{counter-increment:st;position:relative;padding:0 0 16px 34px;border-left:2px solid var(--rule);
+          margin-left:11px}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{content:counter(st);position:absolute;left:-12px;top:-2px;width:22px;height:22px;
+   border-radius:50%;background:var(--sunken);border:1px solid var(--rule);display:grid;place-items:center;
+   font-size:12px;font-weight:700;color:var(--muted)}
+.steps>li.done::before{content:'✓';background:var(--accent-soft);border-color:var(--accent);
+   color:var(--accent)}
 </style>
 </head>
 <body>
@@ -249,9 +481,9 @@ function Kpi({label, value, note, tone=''}) {
   );
 }
 
-function Call({tone='', label, children, style}) {
+function Call({tone='', label, children}) {
   return (
-    <div className={'call ' + tone} style={style}>
+    <div className={'call ' + tone}>
       {label && <span className="lab">{label}</span>}
       {children}
     </div>
@@ -351,7 +583,7 @@ function Search({value, onChange, placeholder, count, total}) {
 
 /* ─────────────── 탭: 개요 ─────────────── */
 
-function Overview({d}) {
+function OverviewBody({d}) {
   const api = d.api_verification.apis;
   const notice = api.filter(a => a.kind === '공고');
   // '수집 가능 131' 은 낙관적 집계였다 — 그중 105 가 사이트 개편에 취약한 HTML 이다.
@@ -672,14 +904,1436 @@ function Datasets({d}) {
 
 /* ─────────────── 탭: 키워드 ─────────────── */
 
+/* ─────────────── 키워드 네트워크 (3D) ───────────────
+   실측 매칭 데이터(gate_results)의 동시출현 그래프를 3D 로 그린다.
+   외부 라이브러리 없이 캔버스에 직접 그린다 — three.js 를 들이면 오너가
+   내부를 읽을 수 없게 된다(NFR-02). 힘-방향 배치와 회전 투영은 아래
+   200줄이 전부고, 각 단계에 왜가 적혀 있다. */
+
+const KN_COLORS = {
+  dark:  {primary:'#4ade80', secondary:'#60a5fa', facility:'#c084fc',
+          target:'#fbbf24', exclude:'#f87171', region:'#22d3ee',
+          edge:'rgba(148,163,184,', label:'#e2e8f0', dim:'rgba(148,163,184,.35)'},
+  light: {primary:'#15803d', secondary:'#1d4ed8', facility:'#7e22ce',
+          target:'#b45309', exclude:'#b91c1c', region:'#0e7490',
+          edge:'rgba(71,85,105,', label:'#1e293b', dim:'rgba(100,116,139,.4)'},
+};
+const KN_CAT_KO = {primary:'1차', secondary:'2차', facility:'시설',
+                   target:'대상', exclude:'제외어', region:'지역',
+                   field:'분야', biztype:'유형', support:'지원형태'};
+// 범용 축 색 — 도메인 팔레트를 재사용한다 (분야=초록, 유형=파랑, 형태=주황)
+for (const t of ['dark', 'light']) {
+  KN_COLORS[t].field = KN_COLORS[t].primary;
+  KN_COLORS[t].biztype = KN_COLORS[t].secondary;
+  KN_COLORS[t].support = KN_COLORS[t].target;
+}
+
+/* ── 구체 질감 ──
+   평면 원 대신, 왼쪽 위 광원을 가정한 라디얼 그라디언트 구를 그린다.
+   매 프레임 그라디언트를 만들면 느리므로 **색깔당 한 번** 큰 구를 그려
+   캐시하고, 그릴 때 배율만 바꾼다 — 그라디언트는 축소해도 질감이 산다. */
+const KN_SPRITES = new Map();
+const KN_R0 = 40, KN_PAD = 20;                   // 원판 반지름 · 광택 여유
+function knSphereSprite(color) {
+  let sp = KN_SPRITES.get(color);
+  if (sp) return sp;
+  const S = (KN_R0 + KN_PAD) * 2;
+  const c = document.createElement('canvas');
+  c.width = c.height = S;
+  const x = c.getContext('2d');
+  const m = /^#(..)(..)(..)$/.exec(color) || [];
+  const R = parseInt(m[1] || '96', 16), G = parseInt(m[2] || '96', 16),
+        B = parseInt(m[3] || '96', 16);
+  const mix = (k) => 'rgb(' + Math.max(0, Math.min(255, R + k)) + ','
+    + Math.max(0, Math.min(255, G + k)) + ',' + Math.max(0, Math.min(255, B + k)) + ')';
+  const cx = S / 2, cy = S / 2, r = KN_R0;
+  // 본체 — 광원 쪽이 밝고 가장자리로 갈수록 어둡다
+  const g = x.createRadialGradient(cx - r * 0.38, cy - r * 0.42, r * 0.06,
+                                   cx, cy, r * 1.02);
+  g.addColorStop(0, mix(95)); g.addColorStop(0.3, mix(30));
+  g.addColorStop(0.72, mix(0)); g.addColorStop(1, mix(-80));
+  x.fillStyle = g;
+  x.beginPath(); x.arc(cx, cy, r, 0, Math.PI * 2); x.fill();
+  // 표면 광택점 — 이게 있어야 '구'로 읽힌다
+  const hi = x.createRadialGradient(cx - r * 0.42, cy - r * 0.5, 0,
+                                    cx - r * 0.42, cy - r * 0.5, r * 0.5);
+  hi.addColorStop(0, 'rgba(255,255,255,.75)');
+  hi.addColorStop(1, 'rgba(255,255,255,0)');
+  x.fillStyle = hi;
+  x.beginPath(); x.arc(cx, cy, r, 0, Math.PI * 2); x.fill();
+  // 바닥 반사광 — 아래쪽 가장자리를 살짝 띄워 입체를 완성
+  const rim = x.createRadialGradient(cx + r * 0.3, cy + r * 0.55, r * 0.1,
+                                     cx + r * 0.3, cy + r * 0.55, r * 0.75);
+  rim.addColorStop(0, 'rgba(255,255,255,.14)');
+  rim.addColorStop(1, 'rgba(255,255,255,0)');
+  x.fillStyle = rim;
+  x.beginPath(); x.arc(cx, cy, r, 0, Math.PI * 2); x.fill();
+  sp = {c, S};
+  KN_SPRITES.set(color, sp);
+  return sp;
+}
+function knSphere(ctx, x, y, r, color) {
+  const sp = knSphereSprite(color);
+  const k = r / KN_R0, half = (sp.S / 2) * k;
+  ctx.drawImage(sp.c, x - half, y - half, sp.S * k, sp.S * k);
+}
+/* 글자를 폭에 맞춰 줄이고, 그래도 넘치면 말줄임한다 —
+   글자가 도형 밖으로 새는 것은 어떤 경우에도 허용하지 않는다. */
+function knFitText(ctx, text, maxW, base, min, weight) {
+  let size = base;
+  const f = (sz) => (weight || '600') + ' ' + sz + 'px sans-serif';
+  ctx.font = f(size);
+  while (size > min && ctx.measureText(text).width > maxW) {
+    size--; ctx.font = f(size);
+  }
+  if (ctx.measureText(text).width > maxW) {
+    let t = text;
+    while (t.length > 1 && ctx.measureText(t + '…').width > maxW) t = t.slice(0, -1);
+    text = t + '…';
+  }
+  return {text, size, font: f(size)};
+}
+/* 허브 글자색 — 구슬 밝기에 따라 검정/흰색을 고른다 (대비 실패 방지) */
+function knInkFor(hex) {
+  const m = /^#(..)(..)(..)$/.exec(hex) || [];
+  const v = [1, 2, 3].map((i) => parseInt(m[i] || '80', 16) / 255)
+    .map((c) => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+  return (0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]) > 0.42 ? '#0f172a' : '#f8fafc';
+}
+
+function KeyNet({q, mode}) {
+  const [g, setG] = useState(null);
+  const [err, setErr] = useState(null);
+  const [sel, setSel] = useState('');            // 클릭·검색으로 고른 키워드
+  const [fc, setFc] = useState(null);            // 초점 상세 (이웃·추세·RAG)
+  const [fcBusy, setFcBusy] = useState(false);
+  const cv = React.useRef(null);
+  const sim = React.useRef(null);                // 시뮬레이션 상태 (렌더 밖)
+  // 렌더 루프는 ref 로 최신 상태를 읽는다 — sel·fc 를 effect 의존성에 두면
+  // 클릭·검색마다 물리 배치가 통째로 재생성돼 그래프가 널뛴다.
+  const selRef = React.useRef(''); selRef.current = sel;
+  const fcRef = React.useRef(null); fcRef.current = fc;
+  const qRef = React.useRef(''); qRef.current = (q || '').trim();
+
+  // ① 그래프 한 번 로드
+  useEffect(() => {
+    setG(null); setFc(null); setSel('');
+    fetch(API + '/api/keyword-net?mode=' + (mode || 'domain'))
+      .then((r) => r.json())
+      .then((d) => d.error ? setErr(d.error) : setG(d))
+      .catch(() => setErr('서버가 꺼져 있습니다 — 바탕화면 아이콘으로 실행하면 실측 네트워크가 보입니다.'));
+  }, [mode]);
+
+  // ② 검색어·선택 → 초점 조회 (0.5초 디바운스 — 타이핑마다 RAG 를 돌리지 않게)
+  useEffect(() => {
+    const key = sel || (q || '').trim();
+    if (!key) { setFc(null); return; }
+    setFcBusy(true);
+    const t = setTimeout(() => {
+      fetch(API + '/api/keyword-net?q=' + encodeURIComponent(key)
+            + '&mode=' + (mode || 'domain'))
+        .then((r) => r.json()).then((d) => { setFc(d); setFcBusy(false); })
+        .catch(() => setFcBusy(false));
+    }, sel ? 80 : 500);
+    return () => clearTimeout(t);
+  }, [q, sel]);
+
+  // ③ 물리 배치 + 회전 투영 + 그리기
+  useEffect(() => {
+    if (!g || !cv.current) return;
+    const canvas = cv.current;
+    const ctx = canvas.getContext('2d');
+    const N = g.nodes.slice(0, 80);              // 상위 80 — 그 밑은 점 잡음
+    const idx = {}; N.forEach((n, i) => { idx[n.id] = i; });
+    const E = g.edges.filter((e) => idx[e[0]] !== undefined && idx[e[1]] !== undefined);
+
+    // 초기 좌표 — 구 표면에 흩뿌린다 (모두 중앙에서 시작하면 첫 프레임에 폭발)
+    const P = N.map((n, i) => {
+      const t1 = (i * 2.399963) % (Math.PI * 2);       // 황금각 — 고르게 퍼짐
+      const t2 = Math.acos(1 - 2 * ((i + 0.5) / N.length));
+      const R = 150;
+      return {x: R * Math.sin(t2) * Math.cos(t1), y: R * Math.sin(t2) * Math.sin(t1),
+              z: R * Math.cos(t2), vx: 0, vy: 0, vz: 0};
+    });
+    const S = {P, ax: -0.35, ay: 0.6, zoom: 1, spin: 0.0035, warm: 220,
+               drag: null, moved: 0, hover: -1};
+    sim.current = {S, N, E, idx};
+
+    const maxW = Math.max(1, ...E.map((e) => e[2]));
+    const rad = (n) => 3 + Math.min(20, Math.sqrt(n.n) * 2.1);
+
+    function step() {
+      // 힘: 반발(모든 쌍) + 용수철(엣지) + 약한 구심력. 73개면 O(n²)도 즉시다.
+      for (let i = 0; i < P.length; i++) {
+        const a = P[i];
+        for (let j = i + 1; j < P.length; j++) {
+          const b = P[j];
+          let dx = a.x - b.x, dy = a.y - b.y, dz = a.z - b.z;
+          let d2 = dx * dx + dy * dy + dz * dz + 0.01;
+          const f = 1400 / d2;                   // 쿨롱 반발
+          const d = Math.sqrt(d2);
+          dx /= d; dy /= d; dz /= d;
+          a.vx += dx * f; a.vy += dy * f; a.vz += dz * f;
+          b.vx -= dx * f; b.vy -= dy * f; b.vz -= dz * f;
+        }
+      }
+      for (const [ea, eb, w] of E) {
+        const a = P[idx[ea]], b = P[idx[eb]];
+        const dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z;
+        const d = Math.sqrt(dx * dx + dy * dy + dz * dz) + 0.01;
+        // 함께 나온 횟수가 많을수록 세게 당긴다 — 군집이 곧 의미
+        const k = 0.002 + 0.02 * Math.min(1, w / maxW);
+        const f = k * (d - 60);
+        a.vx += (dx / d) * f; a.vy += (dy / d) * f; a.vz += (dz / d) * f;
+        b.vx -= (dx / d) * f; b.vy -= (dy / d) * f; b.vz -= (dz / d) * f;
+      }
+      for (const p of P) {
+        p.vx -= p.x * 0.001; p.vy -= p.y * 0.001; p.vz -= p.z * 0.001;
+        p.vx *= 0.9; p.vy *= 0.9; p.vz *= 0.9;   // 감쇠 — 안 하면 영원히 떤다
+        p.x += p.vx; p.y += p.vy; p.z += p.vz;
+      }
+    }
+
+    // 워밍업은 rAF 를 기다리지 않는다 — 숨겨진 탭은 rAF 가 아예 멈추므로
+    // (실측: visibilityState=hidden 에서 첫 프레임조차 안 돎) 배치를 지금 끝낸다.
+    while (S.warm > 0) { step(); S.warm--; }
+
+    let raf = 0;
+    function frame() {
+      step();                                    // 잔여 진동은 감쇠가 잡는다
+      if (!S.drag) S.ay += S.spin;               // 손대지 않으면 천천히 돈다
+
+      const dpr = window.devicePixelRatio || 1;
+      const W = canvas.clientWidth, H = canvas.clientHeight;
+      if (canvas.width !== W * dpr) { canvas.width = W * dpr; canvas.height = H * dpr; }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+
+      const theme = document.documentElement.getAttribute('data-theme') === 'light'
+                    ? 'light' : 'dark';
+      const C = KN_COLORS[theme];
+      const cosY = Math.cos(S.ay), sinY = Math.sin(S.ay);
+      const cosX = Math.cos(S.ax), sinX = Math.sin(S.ax);
+      const FOV = 520;
+
+      const proj = P.map((p) => {
+        const x1 = p.x * cosY + p.z * sinY;      // Y축 회전
+        const z1 = -p.x * sinY + p.z * cosY;
+        const y2 = p.y * cosX - z1 * sinX;       // X축 회전
+        const z2 = p.y * sinX + z1 * cosX;
+        const s = (FOV / (FOV + z2)) * S.zoom;   // 원근 나누기
+        return {sx: W / 2 + x1 * s, sy: H / 2 + y2 * s, s, z: z2};
+      });
+
+      const fcv = fcRef.current, qq = qRef.current;
+      const focusId = selRef.current || (fcv && fcv.found ? fcv.id : '');
+      const fi = focusId !== undefined && idx[focusId] !== undefined ? idx[focusId] : -1;
+      // 타이핑 즉시 반응 — 검색어를 **포함하는** 노드는 서버 응답을 기다리지
+      // 않고 바로 빛난다. 검색창과 그래프가 이어져 있음을 손끝에서 느끼게.
+      const hl = new Set();
+      const qterms = qq ? qq.split(/[,\s·+/]+/).filter(Boolean) : [];
+      if (qterms.length && fi < 0)
+        for (const nn of N)
+          if (qterms.some((t) => nn.id.includes(t))) hl.add(idx[nn.id]);
+      const nb = new Set();
+      if (fi >= 0) for (const [a, b] of E) {
+        if (a === focusId) nb.add(idx[b]);
+        if (b === focusId) nb.add(idx[a]);
+      }
+
+      // 엣지 — 깊이·가중치로 투명도. 초점이 있으면 그 줄만 진하게.
+      for (const [ea, eb, w] of E) {
+        const a = proj[idx[ea]], b = proj[idx[eb]];
+        const onFocus = fi >= 0 && (ea === focusId || eb === focusId);
+        const alpha = fi >= 0
+          ? (onFocus ? 0.75 : 0.05)
+          : (0.06 + 0.5 * (w / maxW)) * Math.min(a.s, b.s);
+        ctx.strokeStyle = C.edge + alpha + ')';
+        ctx.lineWidth = onFocus ? 1.6 : (0.5 + 1.8 * (w / maxW));
+        ctx.beginPath(); ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy); ctx.stroke();
+      }
+
+      // 노드 — 뒤에서 앞으로 (안 그러면 앞 구슬이 뒤에 깔린다)
+      const order = P.map((_, i) => i).sort((a, b) => proj[b].z - proj[a].z);
+      for (const i of order) {
+        const p = proj[i], n = N[i];
+        const r = rad(n) * p.s;
+        const isHl = hl.has(i);
+        const dimmed = (fi >= 0 && i !== fi && !nb.has(i))
+                    || (fi < 0 && qq && hl.size > 0 && !isHl);
+        const col = dimmed ? C.dim : (KN_COLORS[theme][n.cat] || C.label);
+        const glow = i === fi || i === S.hover || isHl;
+        const rr = Math.max(1.5, r);
+        ctx.globalAlpha = dimmed ? 0.35 : (0.55 + 0.45 * Math.min(1, p.s));
+        if (dimmed || rr < 3.5) {
+          // 멀어서 작거나 흐린 구슬은 평면 원 — 이 크기에선 질감이 안 보인다
+          ctx.fillStyle = col;
+          ctx.beginPath(); ctx.arc(p.sx, p.sy, rr, 0, Math.PI * 2); ctx.fill();
+        } else {
+          if (glow) { ctx.shadowColor = col; ctx.shadowBlur = 20; }
+          knSphere(ctx, p.sx, p.sy, rr, col);
+          ctx.shadowBlur = 0;
+        }
+        ctx.globalAlpha = 1;
+        // 라벨 — 큰 노드·초점·이웃만. 전부 쓰면 글자 안개가 된다.
+        if (i === fi || nb.has(i) || isHl || n.n >= (N[11] ? N[11].n : 0) || i === S.hover) {
+          ctx.font = (i === fi ? '700 ' : '') + Math.max(10, 11 * p.s) + 'px sans-serif';
+          ctx.fillStyle = dimmed ? C.dim : C.label;
+          ctx.fillText(n.id + ' ' + n.n, p.sx + r + 3, p.sy + 3);
+        }
+      }
+      // ── 검색 별자리 — 그래프에 없는 낱말·복수 낱말 검색의 연계 화면 ──
+      // 낱말 하나(0건)든 여럿("숲체험 명상")이든 같은 판이다: 낱말마다 허브를
+      // 세우고, 실측 이웃(함께 나온 횟수)이나 사전 연관어를 둘레에 건다.
+      // 두 허브 모두에 걸린 낱말은 **다리 개념** — 금색 실선으로 세운다.
+      sim.current.overlay = null;
+      const wantConst = qq && fcv
+        && (fcv.multi || (fcv.found === false && (fcv.related || []).length));
+      if (wantConst) {
+        const slate = theme === 'light' ? '#334155' : '#64748b';
+        const hubs = fcv.multi
+          ? fcv.terms.map((t) => ({
+              label: t.term, term: t.term,
+              sub: t.found ? '공고 ' + t.n + '건' : '공고 0건',
+              col: t.found ? (KN_COLORS[theme][t.cat] || slate) : slate,
+              items: t.found
+                ? t.neighbors.map((x) => ({id: x.id, cat: x.cat, num: x.w, unit: '회'}))
+                : (t.related || []).map((x) => ({id: x.id, cat: x.cat, num: x.n, unit: '건'})),
+            }))
+          : [{label: fcv.q, term: fcv.q, sub: '공고 0건', col: slate,
+              items: (fcv.related || []).map((x) => ({id: x.id, cat: x.cat, num: x.n, unit: '건'}))}];
+
+        ctx.fillStyle = theme === 'light' ? 'rgba(246,248,246,.84)' : 'rgba(16,22,20,.84)';
+        ctx.fillRect(0, 0, W, H);
+        const ov = [];
+        const NH = hubs.length;
+        const hubPos = hubs.map((_, k) => {
+          if (NH === 1) return {x: W / 2, y: H * 0.46};
+          if (NH === 2) return {x: W * (k ? 0.7 : 0.3), y: H * 0.45};
+          const a2 = -Math.PI / 2 + (k * 2 * Math.PI) / NH;
+          return {x: W / 2 + Math.min(W, H) * 0.28 * Math.cos(a2),
+                  y: H * 0.46 + Math.min(W, H) * 0.22 * Math.sin(a2)};
+        });
+
+        // 같은 낱말이 여러 허브에 있으면 다리다
+        const owners = {};
+        hubs.forEach((h, k) => h.items.forEach((it) => {
+          (owners[it.id] = owners[it.id] || {it, hubs: []}).hubs.push(k);
+        }));
+        const all = Object.values(owners);
+        const bridges = all.filter((o) => o.hubs.length > 1).slice(0, 6);
+        const solos = all.filter((o) => o.hubs.length === 1);
+
+        const RH = Math.min(W, H) * (NH === 1 ? 0.33 : 0.21);
+        const put = [];
+        const byHub = hubs.map(() => []);
+        solos.forEach((o) => byHub[o.hubs[0]].push(o));
+        byHub.forEach((arr, k) => {
+          // 고리의 정면을 다른 허브 **반대쪽**으로 — 가운데(다리 자리)를 비운다
+          const away = NH > 1
+            ? Math.atan2(hubPos[k].y - H * 0.45, hubPos[k].x - W / 2)
+            : -Math.PI / 2;
+          const m2 = Math.min(arr.length, 8);
+          arr.slice(0, 8).forEach((o, j) => {
+            const a3 = away + ((j - (m2 - 1) / 2) * 2 * Math.PI) / Math.max(9, m2 + 3);
+            put.push({o, x: hubPos[k].x + RH * Math.cos(a3),
+                      y: hubPos[k].y + RH * Math.sin(a3) * 0.92});
+          });
+        });
+        bridges.forEach((o, j) => {
+          const xs = o.hubs.map((k) => hubPos[k].x);
+          const ys = o.hubs.map((k) => hubPos[k].y);
+          put.push({o, bridge: true,
+                    x: xs.reduce((u, v) => u + v) / xs.length,
+                    y: ys.reduce((u, v) => u + v) / ys.length
+                       + (j - (bridges.length - 1) / 2) * 48});
+        });
+
+        const gold = theme === 'light' ? 'rgba(180,83,9,.85)' : 'rgba(251,191,36,.85)';
+        for (const q0 of put) {
+          for (const k of q0.o.hubs) {
+            ctx.strokeStyle = q0.bridge ? gold : C.edge + '0.45)';
+            ctx.lineWidth = q0.bridge ? 2.2 : 1;
+            ctx.setLineDash(q0.bridge ? [] : [4, 4]);
+            ctx.beginPath(); ctx.moveTo(hubPos[k].x, hubPos[k].y);
+            ctx.lineTo(q0.x, q0.y); ctx.stroke();
+          }
+        }
+        ctx.setLineDash([]);
+
+        ctx.textAlign = 'center';
+        for (const q0 of put) {
+          const it = q0.o.it;
+          const r = 8 + Math.min(15, Math.sqrt(it.num || 0) * 2.2);
+          const col = KN_COLORS[theme][it.cat] || C.label;
+          if (it.num || q0.bridge) { ctx.shadowColor = col; ctx.shadowBlur = 14; }
+          knSphere(ctx, q0.x, q0.y, r, col);
+          ctx.shadowBlur = 0;
+          const ft = knFitText(ctx, it.id + ' · ' + (it.num || 0) + it.unit, 140, 12, 9);
+          ctx.font = ft.font; ctx.fillStyle = C.label;
+          ctx.fillText(ft.text, q0.x, q0.y + r + 14);
+          ov.push({id: it.id, sx: q0.x, sy: q0.y, r: r + 10});
+        }
+
+        // 허브 — 글자 폭에 맞춰 구슬이 커지고, 글자는 구슬 안에서만 산다
+        hubs.forEach((h, k) => {
+          ctx.font = '700 14px sans-serif';
+          const tw = ctx.measureText(h.label).width;
+          const hr = Math.max(30, Math.min(48, tw / 2 + 16));
+          ctx.shadowColor = 'rgba(128,128,220,.5)'; ctx.shadowBlur = 22;
+          knSphere(ctx, hubPos[k].x, hubPos[k].y, hr, h.col);
+          ctx.shadowBlur = 0;
+          const ink = knInkFor(h.col);
+          const f1 = knFitText(ctx, h.label, hr * 2 - 16, 14, 9, '700');
+          ctx.font = f1.font; ctx.fillStyle = ink;
+          ctx.fillText(f1.text, hubPos[k].x, hubPos[k].y - 1);
+          const f2 = knFitText(ctx, h.sub, hr * 2 - 18, 10, 8);
+          ctx.font = f2.font;
+          ctx.fillText(f2.text, hubPos[k].x, hubPos[k].y + f1.size);
+          ov.push({id: h.term, sx: hubPos[k].x, sy: hubPos[k].y, r: hr + 8});
+        });
+        ctx.textAlign = 'left';
+        ctx.fillStyle = C.label; ctx.font = '11px sans-serif';
+        ctx.fillText(NH > 1
+          ? '금색 실선 = 두 검색어를 모두 잇는 다리 개념 · 구슬을 누르면 이동'
+          : '사전 연관어 별자리 — 구슬을 누르면 그 낱말로 이동', 10, H - 10);
+        sim.current.overlay = ov;
+      }
+      sim.current.proj = proj;
+      if (!document.hidden) raf = requestAnimationFrame(frame);
+    }
+    raf = requestAnimationFrame(frame);
+    const heart = setInterval(() => { if (document.hidden) frame(); }, 1000);
+    const wake = () => { if (!document.hidden) raf = requestAnimationFrame(frame); };
+    document.addEventListener('visibilitychange', wake);
+    return () => { cancelAnimationFrame(raf); clearInterval(heart);
+                   document.removeEventListener('visibilitychange', wake); };
+  }, [g]);
+
+  // ④ 조작 — 끌면 회전, 휠 줌, 짧은 탭이면 노드 선택 (터치 겸용 포인터 이벤트)
+  const pick = (x, y) => {
+    const s = sim.current; if (!s) return '';
+    if (s.overlay) {                              // 별자리가 떠 있으면 그쪽 우선
+      for (const o of s.overlay) {
+        if ((o.sx - x) ** 2 + (o.sy - y) ** 2 < o.r * o.r) return o.id;
+      }
+      return '';
+    }
+    if (!s.proj) return '';
+    let best = -1, bd = 22 * 22;
+    s.proj.forEach((p, i) => {
+      const d = (p.sx - x) ** 2 + (p.sy - y) ** 2;
+      if (d < bd) { bd = d; best = i; }
+    });
+    return best >= 0 ? s.N[best].id : '';
+  };
+  const onDown = (e) => {
+    const s = sim.current; if (!s) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    s.S.drag = {x: e.clientX, y: e.clientY}; s.S.moved = 0;
+  };
+  const onMove = (e) => {
+    const s = sim.current; if (!s) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    if (s.S.drag) {
+      const dx = e.clientX - s.S.drag.x, dy = e.clientY - s.S.drag.y;
+      s.S.ay += dx * 0.005; s.S.ax += dy * 0.005;
+      s.S.moved += Math.abs(dx) + Math.abs(dy);
+      s.S.drag = {x: e.clientX, y: e.clientY};
+    } else {
+      s.S.hover = (sim.current.idx || {})[pick(e.clientX - rect.left, e.clientY - rect.top)];
+      if (s.S.hover === undefined) s.S.hover = -1;
+    }
+  };
+  const onUp = (e) => {
+    const s = sim.current; if (!s) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    if (s.S.moved < 6) {                          // 끌지 않았다 → 선택
+      const id = pick(e.clientX - rect.left, e.clientY - rect.top);
+      setSel((cur) => (id === cur ? '' : id));
+    }
+    s.S.drag = null;
+  };
+  const onWheel = (e) => {
+    const s = sim.current; if (!s) return;
+    e.preventDefault();
+    s.S.zoom = Math.max(0.4, Math.min(3, s.S.zoom * (e.deltaY < 0 ? 1.1 : 0.9)));
+  };
+
+  if (err) return (
+    <div className="panel" style={{marginBottom: '1rem'}}>
+      <p className="empty-h">키워드 네트워크</p>
+      <p className="small">⚠️ {err}</p>
+    </div>
+  );
+
+  const key = fc && (fc.found ? fc.id : fc.q);
+  return (
+    <div style={{marginBottom: '1.2rem'}}>
+      <div className="knGrid">
+        <div className="panel knCanvasBox">
+          <div className="small" style={{display:'flex',justifyContent:'space-between',flexWrap:'wrap',gap:6}}>
+            <b>키워드 네트워크 — 공고 {g ? g.notices.toLocaleString() : '…'}건 실측</b>
+            <span style={{color:'var(--muted)'}}>끌면 회전 · 휠 확대 · 구슬을 누르면 상세</span>
+          </div>
+          <canvas ref={cv} className="knCanvas"
+            onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp}
+            onWheel={onWheel} />
+          <div className="knLegend small">
+            {(mode === 'general'
+              ? ['field','biztype','support','region']
+              : ['primary','secondary','facility','target','exclude','region']).map((c) => (
+              <span key={c}><i style={{background:
+                KN_COLORS[document.documentElement.getAttribute('data-theme')==='light'?'light':'dark'][c]}} />
+                {KN_CAT_KO[c]}</span>
+            ))}
+            <span style={{color:'var(--muted)'}}>구슬 크기 = 매칭 공고 수</span>
+          </div>
+        </div>
+
+        <div className="panel knSide">
+          {!fc && !fcBusy ? (
+            <Fragment>
+              <p className="empty-h">키워드를 고르세요</p>
+              <p className="small">위 검색창에 입력하거나, 그래프의 구슬을 누르면
+                <b> 매칭 공고 수·함께 나온 키워드·월별 추세·RAG 원문 해설</b>이 여기 나옵니다.</p>
+            </Fragment>
+          ) : fcBusy ? (
+            <p className="small">⏳ 분석 중… (RAG 검색 포함)</p>
+          ) : fc.multi ? (
+            <Fragment>
+              <h3 style={{marginBottom: 6}}>복수 키워드 {fc.terms.length}개</h3>
+              {fc.terms.map((t) => (
+                <div key={t.term} style={{marginBottom: 10, paddingBottom: 8,
+                     borderBottom: '1px dashed var(--rule)'}}>
+                  <b>{t.term}</b>{' '}
+                  {t.found ? (
+                    <Fragment>
+                      <span className="small">
+                        {t.id !== t.term ? <Fragment>→ <b>{t.id}</b> · </Fragment> : '· '}
+                        공고 <b>{t.n}건</b> · 통과 {t.passed}건</span>
+                      <div className="chips" style={{marginTop: 4}}>
+                        {t.neighbors.slice(0, 5).map((x) => (
+                          <button key={x.id} type="button" className="pill"
+                            title={'함께 나온 공고 ' + x.w + '건'}
+                            onClick={() => setSel(x.id)}>{x.id} ×{x.w}</button>
+                        ))}
+                      </div>
+                    </Fragment>
+                  ) : (
+                    <Fragment>
+                      <span className="small" style={{color: 'var(--muted)'}}>공고 0건</span>
+                      {(t.related || []).length ? (
+                        <div className="chips" style={{marginTop: 4}}>
+                          {t.related.slice(0, 5).map((m) => (
+                            <button key={m.id} type="button" className="pill"
+                              onClick={() => setSel(m.id)}>{m.id} · {m.n || 0}건</button>
+                          ))}
+                        </div>
+                      ) : <span className="small"> · 사전 연관어 없음</span>}
+                    </Fragment>
+                  )}
+                </div>
+              ))}
+              <p className="small" style={{color: 'var(--muted)'}}>
+                🟡 별자리의 <b>금색 실선</b>은 두 검색어를 모두 잇는 다리 개념입니다.</p>
+            </Fragment>
+          ) : fc.found ? (
+            <Fragment>
+              <h3 style={{marginBottom:4}}>{fc.id}
+                <Chip k={{primary:'ok',exclude:'crit',facility:'info',target:'info'}[fc.cat]||''}>
+                  {KN_CAT_KO[fc.cat] || fc.cat}</Chip></h3>
+              <p className="small" style={{marginBottom:8}}>
+                공고 <b>{fc.n}건</b> 매칭 · 게이트 통과 <b>{fc.passed}건</b></p>
+              {fc.neighbors.length ? (
+                <Fragment>
+                  <div className="small" style={{fontWeight:600,margin:'6px 0 4px'}}>함께 나온 키워드</div>
+                  {fc.neighbors.slice(0,8).map((x) => (
+                    <div key={x.id} className="knBar" onClick={() => setSel(x.id)}>
+                      <span className="knBarName">{x.id}</span>
+                      <span className="knBarTrack"><i style={{width:
+                        Math.max(6, 100 * x.w / fc.neighbors[0].w) + '%'}} /></span>
+                      <span className="mono small">{x.w}</span>
+                    </div>
+                  ))}
+                </Fragment>
+              ) : <p className="small">단독으로만 나타났습니다 — 함께 맞은 키워드가 없습니다.</p>}
+              {fc.trend.length ? (
+                <Fragment>
+                  <div className="small" style={{fontWeight:600,margin:'10px 0 4px'}}>월별 추세 (마감월 기준)</div>
+                  <div className="knTrend">
+                    {fc.trend.map(([ym, n]) => (
+                      <div key={ym} title={ym + ' · ' + n + '건'}>
+                        <i style={{height: Math.max(8, 64 * n /
+                          Math.max(...fc.trend.map((t) => t[1]))) + 'px'}} />
+                        <span>{ym.slice(5)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </Fragment>
+              ) : null}
+            </Fragment>
+          ) : (
+            <Fragment>
+              <p className="empty-h">"{fc.q}" — 수집 공고에서 매칭 0건</p>
+              <p className="small">1,835건의 실제 공고 어느 것도 이 말로 잡히지 않았습니다.
+                <b> ADR-009 의 발견 그대로입니다</b> — 공고는 "웰니스관광"·"숲처방" 같은
+                상위 프레임으로 나옵니다. 아래 RAG 해설에서 이 키워드가 실제로 어떤
+                맥락에 사는지 보십시오.</p>
+              {fc.related && fc.related.length ? (
+                <Fragment>
+                  <div className="small" style={{fontWeight:600,margin:'8px 0 4px'}}>사전 연관어</div>
+                  <div className="chips">
+                    {fc.related.map((m) => (
+                      <button key={m.id} type="button" className="pill"
+                        onClick={() => setSel(m.id)}>{m.id} · {m.n || 0}건</button>
+                    ))}
+                  </div>
+                </Fragment>
+              ) : null}
+            </Fragment>
+          )}
+          {fc && fc.rag ? (
+            <div style={{marginTop:12}}>
+              <div className="small" style={{fontWeight:600,marginBottom:4}}>
+                RAG 원문 해설 {fc.rag.ok ? '' : '— ' + fc.rag.why}</div>
+              {fc.rag.hits.map((h, i) => (
+                <div key={i} className="knRag">
+                  <div className="small"><Chip k="info">{h.doc_type}</Chip> <b>{h.title}</b>
+                    <span className="mono" style={{marginLeft:6,color:'var(--muted)'}}>{h.score}</span></div>
+                  <blockquote className="small">{h.content}</blockquote>
+                </div>
+              ))}
+              {fc.rag.ok && !fc.rag.hits.length ? (
+                <p className="small">관련 원문이 없습니다.</p>) : null}
+              <p className="small" style={{color:'var(--muted)',marginTop:6}}>
+                해설은 생성문이 아니라 <b>색인된 원문 인용</b>입니다 — 근거 없는 문장을
+                만들지 않습니다 (작업 규칙 1).</p>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────── New 데이터수집 ───────────────
+   버튼 하나로 수집→본문→중복→게이트→의미대기열→RAG→화면 재생성을 돌린다.
+   순서는 채널확대 작업에서 확립된 것(docs/채널확대_완료보고_20260831.md). */
+
+function RefreshPanel({onClose}) {
+  const [st, setSt] = useState({state: 'idle'});
+  const run = () => {
+    setSt({state: 'run', msg: '시작하는 중…', step: 0});
+    fetch(API + '/api/refresh', {method: 'POST',
+      headers: {'Content-Type': 'application/json'}, body: '{}'})
+      .then((r) => r.json()).then((d) => {
+        if (d.error) { setSt({state: 'err', msg: d.error}); return; }
+        if (d.already) setSt({state: 'run', msg: '이미 진행 중인 수집에 합류합니다…', step: 0});
+        let miss = 0;
+        const poll = () => fetch(API + '/api/jobs?id=' + d.job).then((r) => r.json())
+          .then((j) => {
+            if (!j.id && j.error) {
+              setSt({state: 'err', msg: '작업 기록이 사라졌습니다 (서버 재시작?).'});
+              return;
+            }
+            miss = 0;
+            if (!j.done) {
+              setSt({state: 'run', msg: j.current, step: j.step || 0,
+                     steps: j.steps || 7});
+              setTimeout(poll, 2500); return;
+            }
+            setSt({state: j.ok ? 'ok' : 'warn', lines: j.lines || [],
+                   sec: j.total_sec, msg: j.current});
+          }).catch(() => {
+            if (++miss <= 6) { setTimeout(poll, 3000); return; }
+            setSt({state: 'err', msg: '서버 응답이 끊겼습니다.'});
+          });
+        setTimeout(poll, 1500);
+      }).catch((e) => setSt({state: 'err', msg: e.message}));
+  };
+
+  return (
+    <div className="aiDrawer" style={{width: 'min(480px, calc(100vw - 36px))'}}>
+      <div className="aiHead">
+        <b>🔄 New 데이터수집</b>
+        <span style={{flex: 1}} />
+        <button className="btn sm" onClick={onClose} aria-label="닫기">✕</button>
+      </div>
+      {st.state === 'idle' ? (
+        <Fragment>
+          <p className="small">14개 채널에서 새 공고를 수집하고, 본문을 채우고, 중복을
+            표시하고, 키워드 게이트와 의미 검토 대기열을 갱신하고, RAG 벡터DB 와
+            화면 숫자까지 <b>오늘 기준으로</b> 맞춥니다.</p>
+          <p className="small" style={{color: 'var(--muted)'}}>
+            7단계 · 보통 5~10분 · robots.txt 허용 채널만 · 원본은 지우지 않습니다.
+            도중에 이 창을 닫아도 계속 돌아갑니다.</p>
+          <button className="btn pri" onClick={run}>지금 수집 시작</button>
+        </Fragment>
+      ) : st.state === 'run' ? (
+        <Fragment>
+          <div className="small" style={{marginBottom: 6}}>
+            ⏳ {st.msg}</div>
+          <div className="rfBar"><i style={{width:
+            Math.max(4, 100 * (st.step || 0) / (st.steps || 7)) + '%'}} /></div>
+          <p className="small" style={{color: 'var(--muted)', marginTop: 6}}>
+            {st.step || 0}/{st.steps || 7} 단계 — 창을 닫아도 계속 진행됩니다.</p>
+        </Fragment>
+      ) : st.state === 'err' ? (
+        <Fragment>
+          <p className="small" style={{color: 'var(--critical)'}}>⚠️ {st.msg}</p>
+          <button className="btn" onClick={run}>다시 시도</button>
+        </Fragment>
+      ) : (
+        <Fragment>
+          <div className="small" style={{marginBottom: 6}}>
+            {st.state === 'ok' ? '✅ 완료' : '⚠️ 일부 단계 실패'} · {st.sec}초</div>
+          <pre className="md-pre" style={{fontSize: '.78rem'}}>{(st.lines || []).join(String.fromCharCode(10))}</pre>
+          <div className="controls" style={{marginTop: 8}}>
+            <button className="btn pri" onClick={() => location.reload()}>
+              새 데이터로 화면 새로고침</button>
+            <button className="btn" onClick={run}>다시 실행</button>
+          </div>
+        </Fragment>
+      )}
+    </div>
+  );
+}
+
+/* ─────────────── AI 설정 ───────────────
+   🔒 키는 이 화면에서 서버로 한 번 가고, 로컬 파일에만 남는다.
+   화면은 언제나 마스킹만 받는다 — 원문을 다시 읽어올 방법이 없다. */
+
+const TIER_KO = {basic: '보급형', standard: '표준', top: '최상위'};
+
+function AISetup() {
+  const [cfg, setCfg] = useState(null);
+  const [draft, setDraft] = useState({});
+  const [msg, setMsg] = useState('');
+  // 제공사별 연결 테스트 결과 — 키가 문제인지 모델명이 문제인지 나눠 보여준다
+  const [test, setTest] = useState({});
+  const load = () => fetch(API + '/api/ai/config').then((r) => r.json())
+    .then(setCfg)
+    .catch(() => setMsg('서버가 꺼져 있습니다 — 바탕화면 아이콘으로 실행하십시오.'));
+
+  const runTest = (pid, key) => {
+    setTest((t) => ({...t, [pid]: {state: 'run'}}));
+    fetch(API + '/api/ai/test', {method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(key ? {provider: pid, key} : {provider: pid})})
+      .then((r) => r.json())
+      .then((r) => setTest((t) => ({...t, [pid]: {state: 'done', ...r}})))
+      .catch((e) => setTest((t) => ({...t, [pid]:
+        {state: 'done', error: e.message}})));
+  };
+  useEffect(() => { load(); }, []);
+
+  const post = (payload, okMsg) => {
+    setMsg('처리 중…');
+    fetch(API + '/api/ai/key', {method: 'POST',
+      headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)})
+      .then((r) => r.json()).then((r) => {
+        setMsg(r.error ? '⚠️ ' + r.error : '✅ ' + okMsg);
+        setDraft({}); load();
+        // 저장·모델변경 직후 바로 확인 — 「넣었는데 되나?」를 묻지 않게 한다
+        if (!r.error && payload.provider && payload.action !== 'delete') {
+          runTest(payload.provider);
+        }
+      }).catch((e) => setMsg('⚠️ ' + e.message));
+  };
+
+  if (!cfg) return (
+    <Fragment>
+      <h2 className="sec-title">AI 설정</h2>
+      <p className="small">{msg || '불러오는 중…'}</p>
+    </Fragment>
+  );
+
+  return (
+    <Fragment>
+      <h2 className="sec-title">AI 설정 — 내 API 키로 전략 제안 받기</h2>
+      <p className="sec-desc">키워드 검색 결과(실측 공고 데이터 + RAG 근거)를 AI에게 보내
+        <b> 사업 아이디어·근거 문장</b>을 받습니다. <b>키는 지도사님 것을 쓰고 비용도
+        지도사님 부담</b>입니다 — 중개하는 서버가 없기 때문입니다.</p>
+
+      <Call tone="warn" label="키는 이 컴퓨터에만 저장됩니다">
+        <p>입력한 키는 <span className="mono">config\ai_keys.json</span> 파일 하나에만
+          저장되고, 화면에는 다시 <b>마스킹된 형태만</b> 표시됩니다. 이 파일은 깃 커밋과
+          배포 ZIP 양쪽에서 자동으로 차단됩니다. <b>누구에게도 보내지 마십시오.</b></p>
+      </Call>
+
+      {cfg.providers.map((pv) => (
+        <div className="panel" key={pv.id} style={{marginBottom: '.9rem'}}>
+          <h3>{pv.label}{' '}
+            {pv.has_key ? <Chip k="ok">등록됨 {pv.masked}</Chip> : <Chip>미등록</Chip>}
+            {cfg.active === pv.id ? <Chip k="info">사용 중</Chip> : null}
+          </h3>
+          <p className="small" style={{marginBottom: 8}}>
+            키 발급 →{' '}
+            <a href={pv.key_url} target="_blank" rel="noopener noreferrer">{pv.key_url}</a>
+            {' '}(키는 <span className="mono">{pv.key_hint}</span> 로 시작합니다)
+          </p>
+
+          <div className="controls">
+            <input type="password" className="btn" style={{flex: '1 1 240px'}}
+              placeholder={pv.has_key ? '새 키로 교체하려면 붙여넣기' : '여기에 API 키 붙여넣기'}
+              value={draft[pv.id] || ''} autoComplete="off"
+              onChange={(e) => setDraft({...draft, [pv.id]: e.target.value})} />
+            <select className="btn" value={pv.model} aria-label={pv.label + ' 모델'}
+              onChange={(e) => post({action: 'model', provider: pv.id,
+                                     model: e.target.value}, '모델을 바꿨습니다')}>
+              {!pv.models.some((m) => m.id === pv.model) ? (
+                <option value={pv.model}>[직접] {pv.model}</option>
+              ) : null}
+              {pv.models.map((m) => (
+                <option key={m.id} value={m.id}>[{TIER_KO[m.tier]}] {m.label}</option>
+              ))}
+            </select>
+            <button className="btn pri" disabled={!(draft[pv.id] || '').trim()}
+              onClick={() => post({provider: pv.id, key: draft[pv.id],
+                                   model: pv.model}, '키를 저장했습니다')}>저장</button>
+            {pv.has_key ? (
+              <Fragment>
+                <button className="btn" onClick={() => runTest(pv.id)}
+                  title="키가 실제로 쓸 수 있는지 확인합니다 (토큰 비용 없음)">
+                  연결 테스트</button>
+                {cfg.active !== pv.id ? (
+                  <button className="btn" onClick={() => post(
+                    {action: 'active', provider: pv.id},
+                    '이 제공사를 쓰도록 바꿨습니다')}>이걸로 사용</button>
+                ) : null}
+                <button className="btn" onClick={() => {
+                  if (window.confirm(pv.label + ' 키를 지웁니다. 계속할까요?'))
+                    post({action: 'delete', provider: pv.id}, '키를 삭제했습니다');
+                }}>키 삭제</button>
+              </Fragment>
+            ) : null}
+          </div>
+          <div className="small" style={{color: 'var(--muted)'}}>
+            보급형은 빠르고 싸며, 최상위는 느리지만 추론이 깊습니다.
+            처음에는 <b>보급형</b>으로 충분합니다.
+            현재 모델: <span className="mono">{pv.model}</span>
+          </div>
+          {test[pv.id] ? (() => {
+            const t = test[pv.id];
+            if (t.state === 'run') return (
+              <p className="small" style={{marginTop: 6}}>⏳ 확인 중… (토큰 비용 없음)</p>);
+            if (t.error && t.key_ok === undefined) return (
+              <p className="small" style={{marginTop: 6, color: 'var(--critical)'}}>
+                ⚠️ {t.error}</p>);
+            return (
+              <div className="panel" style={{marginTop: 8, padding: '8px 12px',
+                   borderColor: t.ok ? 'var(--accent)' : 'var(--critical)'}}>
+                <div className="small">
+                  <b>{t.key_ok ? '🔑 키 유효' : '🔑 키 사용 불가'}</b>
+                  {t.key_ok ? (
+                    <Fragment>
+                      {' · '}모델 <span className="mono">{t.model}</span>{' '}
+                      {t.model_ok ? '✅ 있음' : '❌ 이 키로는 없음'}
+                      {/* 목록에 있어도 한도 초과면 실제로는 못 쓴다 — 따로 표시 */}
+                      {t.model_ok ? (
+                        <Fragment>{' · '}실제 호출{' '}
+                          {t.gen_ok === false ? '❌ 거부됨' : '✅ 성공'}</Fragment>
+                      ) : null}
+                      {t.ms ? <span style={{color: 'var(--muted)'}}> · {t.ms}ms</span> : null}
+                    </Fragment>
+                  ) : (t.code ? ' · HTTP ' + t.code : '')}
+                </div>
+                {t.detail ? (
+                  <div className="small" style={{marginTop: 4, wordBreak: 'break-word'}}>
+                    {t.detail}</div>
+                ) : null}
+                {t.hint ? (
+                  <div className="small" style={{marginTop: 4}}>
+                    <Markdown text={'👉 ' + t.hint} /></div>
+                ) : null}
+                {t.key_ok && !t.model_ok && (t.usable || []).length ? (
+                  <div style={{marginTop: 6}}>
+                    <div className="small" style={{fontWeight: 600, marginBottom: 4}}>
+                      이 키로 쓸 수 있는 모델 {t.usable.length}개 — 눌러서 적용</div>
+                    <div className="chips">
+                      {t.usable.slice(0, 24).map((mid) => (
+                        <button key={mid} type="button" className="pill"
+                          onClick={() => post({action: 'model', provider: pv.id,
+                                               model: mid}, '모델을 ' + mid + ' 로 바꿨습니다')}>
+                          {mid}</button>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            );
+          })() : null}
+          {pv.has_key ? (
+            <details style={{marginTop: 6}}>
+              <summary className="small">모델 직접 입력 — 목록에 없는 최신 모델을 쓸 때</summary>
+              <div className="controls" style={{marginTop: 6}}>
+                <input type="text" className="btn" style={{flex: '1 1 200px'}}
+                  placeholder="모델 ID 그대로 (예: gpt-5.7, gemini-3.2-pro)"
+                  value={draft['m_' + pv.id] || ''}
+                  onChange={(e) => setDraft({...draft, ['m_' + pv.id]: e.target.value})} />
+                <button className="btn" disabled={!(draft['m_' + pv.id] || '').trim()}
+                  onClick={() => post({action: 'model', provider: pv.id,
+                                       model: (draft['m_' + pv.id] || '').trim()},
+                                      '모델을 직접 지정했습니다')}>적용</button>
+              </div>
+              <p className="small" style={{color: 'var(--muted)'}}>
+                모델명이 틀리면 답변 시 오류로 알려 줍니다 — 제공사 문서의 ID 를 그대로 쓰세요.</p>
+            </details>
+          ) : null}
+        </div>
+      ))}
+      {msg ? <p className="small"><b>{msg}</b></p> : null}
+      <p className="small" style={{color: 'var(--muted)'}}>
+        저장 위치: <span className="mono">{cfg.path}</span>
+      </p>
+    </Fragment>
+  );
+}
+
+/* ─────────────── 전역 AI 챗봇 ───────────────
+   어느 메뉴에서 열든 ① 그 메뉴의 **실데이터 요약**과 ② 질문에 맞는 RAG 원문을
+   서버가 함께 붙여 보낸다. 숫자의 정답은 언제나 이 요약 쪽 — 모델 기억이 아니다.
+   대화 이력은 App 이 들고 있어 탭을 옮겨도 이어진다(종·횡 연계). */
+
+function tabContext(tab, d, live) {
+  if (!d) return '';
+  const row = (o, ks) => ks.map((k) => o[k]).filter(Boolean).join(' · ');
+  try {
+    switch (tab) {
+      case 'priority':
+        return '우선순위 채널 ' + d.priority_channels.length + '곳 (점수순):\n'
+          + d.priority_channels.map((c, i) =>
+              (i + 1) + '. ' + row(c, ['name', 'org', 'why']) ).join('\n');
+      case 'channels': {
+        const by = {};
+        d.channels.forEach((c) => { by[c.access || c.type || '?'] =
+          (by[c.access || c.type || '?'] || 0) + 1; });
+        return '수집 채널 ' + d.channels.length + '곳. 접근방식 분포: '
+          + Object.entries(by).map(([k, v]) => k + ' ' + v).join(', ')
+          + '\n상위 20곳: ' + d.channels.slice(0, 20).map((c) => c.name).join(', ');
+      }
+      case 'programs':
+        return '유사사업 사례 ' + d.programs.length + '건. 처음 15건:\n'
+          + d.programs.slice(0, 15).map((p) =>
+              '- ' + row(p, ['name', 'agency', 'budget', 'target'])).join('\n');
+      case 'datasets':
+        return '공공데이터셋 ' + d.datasets.length + '개. 처음 15개:\n'
+          + d.datasets.slice(0, 15).map((x) =>
+              '- ' + row(x, ['name', 'org', 'format'])).join('\n');
+      case 'keywords': {
+        if (window.CHOI_KWMODE === 'general') {
+          const kg = d.keywords_general || {};
+          return '키워드 탭 — 🌐 범용 지원사업 모드. '
+            + Object.entries(kg).map(([k, a]) => k + ' ' + a.length + '개').join(', ')
+            + String.fromCharCode(10) + '분야 예: ' + (kg.field || []).slice(0, 14).join(', ')
+            + String.fromCharCode(10) + '네트워크는 공고 전체(중복 제외)를 분야·사업유형·지원형태 축으로'
+            + ' 실시간 매칭한 것입니다. 범용(전 분야) 사업계획서 전략 질문에 이 축으로 답하십시오.';
+        }
+        const ks = Object.entries(d.keywords)
+          .map(([k, a]) => k + ' ' + a.length + '개').join(', ');
+        return '키워드 사전: ' + ks
+          + '\n1차 예: ' + d.keywords.primary.slice(0, 12).join(', ')
+          + '\n대상 축(연령·성별·계층 포함): ' + d.keywords.target.slice(0, 20).join(', ')
+          + '\n키워드 탭의 3D 네트워크는 공고 1,835건 실측 동시출현 + 지역 축을 보여줍니다.';
+      }
+      case 'market': {
+        const n = d.narrative || {};
+        let s = Object.entries(n).map(([k, v]) =>
+          typeof v === 'string' ? k + ': ' + v.slice(0, 200) : '').filter(Boolean).join('\n');
+        if (live && live.kpi_cards) {
+          s += '\n정량 KPI: ' + live.kpi_cards.slice(0, 8).map((c) =>
+            c.label + ' ' + c.value + (c.delta ? '(' + c.delta + ')' : '')).join(' · ');
+        }
+        return s;
+      }
+      case 'risks':
+        return '라이선스 경고 ' + d.license_warnings.length + '건: '
+          + d.license_warnings.slice(0, 6).map((w) => w.name || w.channel || '').join(', ')
+          + '\n미결정 ' + d.open_questions.length + '건: '
+          + d.open_questions.slice(0, 6).map((q) => (q.q || q.question || '').slice(0, 60)).join(' / ');
+      case 'roadmap':
+        return '수집 단계 ' + (d.collection_steps || []).length + ' · 인제스트 단계 '
+          + (d.ingest_steps || []).length + ' · PMS 모델 항목 ' + (d.pms_model || []).length;
+      case 'prepare':
+        return ['사업계획서 탭 = 작성 파이프라인.',
+          '1단계 공고 선택(수집 목록 or 직접 받은 공고문) → [작성 폴더 만들기]',
+          '2단계 공고문·지정서식 업로드 → 배점표 자동 추출',
+          '3단계 오너 자료 업로드 → RAG 자동 색인',
+          '이후 Claude 터미널에서 "사업계획서 써줘" (G1자격→G2인터뷰→G3배점→G4근거→G5형식)',
+          '품질 검사: python -m choi review --notice-id <번호> 또는 --folder .'].join('\n');
+      case 'overview':
+        return '조사 기준일 ' + d.generated_at + ' · 채널 ' + d.channels.length
+          + ' · 공고사례 ' + d.programs.length + ' · 데이터셋 ' + d.datasets.length
+          + ' · 키워드 ' + Object.values(d.keywords).flat().length;
+      default:
+        return '';
+    }
+  } catch (e) {
+    return '';
+  }
+}
+
+const TAB_LABEL = {prepare: '사업계획서', overview: '개요', market: '시장·시설자금',
+  priority: '우선순위', channels: '채널', programs: '공고 사례',
+  datasets: '공공데이터', keywords: '키워드', roadmap: '로드맵',
+  risks: '리스크', guide: '사용법', ai: 'AI 설정'};
+
+const CHAT_CHIPS = [
+  {label: '이 메뉴는 뭘 보여주나요?', q: '지금 보고 있는 메뉴가 무엇을 보여주고, 사업계획서 작성에 어떻게 쓰는지 알려주세요.'},
+  {label: '✨ 사업 아이디어 3개', q: '이 데이터를 근거로 최은희 지도사에게 맞는 사업 아이디어 3개를 제안해 주세요. 각각 대상·차별점·예상 발주처와 근거 번호를 붙여 주세요.'},
+  {label: '근거 수치 찾기', q: '제안서에 인용할 수 있는 근거 수치를 RAG 에서 찾아 출처와 함께 알려주세요.'},
+  {label: '다음에 뭘 하죠?', q: '지금 단계에서 다음으로 무엇을 하면 되는지 사용법을 알려주세요.'},
+];
+
+function AIChat({tab, data, live, msgs, setMsgs, onClose}) {
+  const [inp, setInp] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  // 실패한 질문 — 다시 치게 하지 않고 버튼 한 번으로 재요청한다
+  const [lastQ, setLastQ] = useState('');
+  // ── 창처럼 다루기 ──
+  // pos=null 이면 기본 자리(오른쪽 아래). 옮기면 좌표를 기억한다.
+  // 자리와 접힘 상태는 localStorage 에 남긴다 — 새로고침해도 그대로.
+  // (사생활 모드에선 던지므로 반드시 감싼다)
+  const [pos, setPos] = useState(() => {
+    try {
+      const v = JSON.parse(localStorage.getItem('choi-ai-pos') || 'null');
+      return (v && typeof v.x === 'number') ? v : null;
+    } catch (e) { return null; }
+  });
+  const [mini, setMini] = useState(false);
+  const boxRef = React.useRef(null);
+  const dragRef = React.useRef(null);
+
+  const clamp = (x, y, w, h) => ({
+    x: Math.max(6, Math.min(x, window.innerWidth - Math.max(160, w) - 6)),
+    y: Math.max(6, Math.min(y, window.innerHeight - 48)),
+  });
+
+  const savePos = (v) => {
+    setPos(v);
+    try { localStorage.setItem('choi-ai-pos', JSON.stringify(v)); } catch (e) {}
+  };
+
+  const onHeadDown = (e) => {
+    // 버튼을 누른 것이면 드래그가 아니다
+    if (e.target.closest('button, select, input')) return;
+    const box = boxRef.current; if (!box) return;
+    const r = box.getBoundingClientRect();
+    dragRef.current = {dx: e.clientX - r.left, dy: e.clientY - r.top,
+                       w: r.width, h: r.height};
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+  const onHeadMove = (e) => {
+    const d = dragRef.current; if (!d) return;
+    savePos(clamp(e.clientX - d.dx, e.clientY - d.dy, d.w, d.h));
+  };
+  const onHeadUp = () => { dragRef.current = null; };
+
+  // 창 크기가 바뀌면 화면 밖으로 나간 서랍을 되돌린다
+  useEffect(() => {
+    const fix = () => {
+      if (!pos || !boxRef.current) return;
+      const r = boxRef.current.getBoundingClientRect();
+      const c = clamp(pos.x, pos.y, r.width, r.height);
+      if (c.x !== pos.x || c.y !== pos.y) savePos(c);
+    };
+    window.addEventListener('resize', fix);
+    return () => window.removeEventListener('resize', fix);
+  }, [pos]);
+
+  const style = pos
+    ? {left: pos.x + 'px', top: pos.y + 'px', right: 'auto', bottom: 'auto'}
+    : {};
+  // 어떤 AI 가 답하는지 **묻기 전에** 보이고, 여기서 바로 바꿀 수 있어야 한다
+  const [cfg, setCfg] = useState(null);
+  const [prov, setProv] = useState('');
+  const [model, setModel] = useState('');
+  // 웹검색은 **끈 상태가 기본**이다 — 켜면 제공사 검색 요금이 따로 붙는다.
+  const [web, setWeb] = useState(false);
+  const endRef = React.useRef(null);
+
+  useEffect(() => {
+    fetch(API + '/api/ai/config').then((r) => r.json()).then((c) => {
+      setCfg(c);
+      const ready = (c.providers || []).filter((x) => x.has_key);
+      const cur = ready.find((x) => x.id === c.active) || ready[0];
+      if (cur) { setProv(cur.id); setModel(cur.model); }
+    }).catch(() => {});
+  }, []);
+
+  const provObj = cfg && prov
+    ? (cfg.providers || []).find((x) => x.id === prov) : null;
+  const ready = cfg ? (cfg.providers || []).filter((x) => x.has_key) : [];
+  useEffect(() => {
+    if (endRef.current) endRef.current.scrollIntoView({block: 'end'});
+  }, [msgs, busy]);
+
+  const ask = (text) => {
+    const q = (text || '').trim();
+    if (!q || busy) return;
+    setErr(''); setInp(''); setLastQ(q);
+    // 재요청이면 실패했던 같은 질문이 두 번 쌓이지 않게 한다
+    const base = (msgs.length && msgs[msgs.length - 1].role === 'user'
+                  && msgs[msgs.length - 1].content === q)
+      ? msgs.slice(0, -1) : msgs;
+    const next = [...base, {role: 'user', content: q, tab}];
+    setMsgs(next); setBusy(true);
+    fetch(API + '/api/ai/chat', {method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        tab, tab_context: tabContext(tab, data, live),
+        provider: prov || undefined, model: model || undefined, web,
+        kw_q: (tab === 'keywords' && window.CHOI_KWQ) || undefined,
+        kw_mode: (tab === 'keywords' && window.CHOI_KWMODE) || undefined,
+        messages: next.map((m) => ({role: m.role, content: m.content})),
+      })})
+      .then((r) => r.json()).then((d) => {
+        if (d.error) { setBusy(false); setErr(d.error); return; }
+        // 폴링은 오래 돈다(최상위 모델은 2분까지). 그 사이 한 번 끊겼다고
+        // 대화를 죽이지 않는다 — 몇 번 더 두드려 보고 그래도 안 되면 알린다.
+        let miss = 0;
+        const poll = () => fetch(API + '/api/jobs?id=' + d.job).then((r) => r.json())
+          .then((j) => {
+            if (!j.id && j.error) {   // 404 — 그런 작업이 없다(서버 재시작 등)
+              setBusy(false);
+              setErr('작업 기록이 사라졌습니다 (서버 재시작?). 다시 보내 주세요.');
+              return;
+            }
+            miss = 0;
+            if (!j.done) { setTimeout(poll, 1500); return; }
+            setBusy(false);
+            if (!j.ok) {
+              setErr((j.error || j.current || '실패')
+                     + (j.hint ? ' — ' + j.hint.replace(/\*\*/g, '') : ''));
+              return;
+            }
+            setMsgs((cur) => [...cur, {role: 'assistant', content: j.text,
+                                       sources: j.sources || [],
+                                       webCites: j.web_cites || [],
+                                       webUsed: j.web_used, webNote: j.web_note,
+                                       truncNote: j.trunc_note, webAsked: web,
+                                       provider: j.provider, model: j.model}]);
+          }).catch(() => {
+            if (++miss <= 5) { setTimeout(poll, 2000); return; }
+            setBusy(false);
+            setErr('서버 응답이 끊겼습니다 — 바탕화면 아이콘으로 서버를 다시 띄워 보세요.');
+          });
+        setTimeout(poll, 1200);
+      }).catch((e) => { setBusy(false); setErr(e.message); });
+  };
+
+  if (mini) {
+    const last = [...msgs].reverse().find((m) => m.role === 'assistant');
+    return (
+      <div className="aiBar" onClick={() => setMini(false)}
+        title="눌러서 다시 펼칩니다">
+        <b>✨ AI 도우미</b>
+        <span className="small" style={{flex: 1, overflow: 'hidden',
+              textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
+          {busy ? '⏳ 답하는 중…'
+                : last ? last.content.replace(/[#*|>]/g, ' ').slice(0, 60)
+                       : '답변 없음 — 눌러서 질문하기'}
+        </span>
+        <button className="btn sm" aria-label="펼치기"
+          onClick={(e) => { e.stopPropagation(); setMini(false); }}>▲ 펼치기</button>
+        <button className="btn sm" aria-label="닫기"
+          onClick={(e) => { e.stopPropagation(); onClose(); }}>✕</button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="aiDrawer" ref={boxRef} style={style}>
+      <div className="aiHead aiDrag" onPointerDown={onHeadDown}
+        onPointerMove={onHeadMove} onPointerUp={onHeadUp}
+        title="여기를 끌어서 옮기십시오">
+        <b>✨ AI 도우미</b>
+        <span className="small" style={{color: 'var(--muted)'}}>
+          지금 보는 곳: <b>{TAB_LABEL[tab] || tab}</b></span>
+        <span style={{flex: 1}} />
+        {msgs.length ? (
+          <button className="btn sm" onClick={() => setMsgs([])}
+            title="대화를 새로 시작합니다">새 대화</button>
+        ) : null}
+        <button className="btn sm" onClick={() => setMini(true)}
+          aria-label="아래로 내리기" title="작업줄로 내립니다 (답변은 유지)">▼</button>
+        {pos ? (
+          <button className="btn sm" onClick={() => savePos(null)}
+            aria-label="제자리로" title="원래 자리로 되돌립니다">⤢</button>
+        ) : null}
+        <button className="btn sm" onClick={onClose} aria-label="닫기">✕</button>
+      </div>
+
+      {cfg ? (
+        ready.length ? (
+          <div className="aiPick">
+            <select className="btn" aria-label="AI 제공사" value={prov}
+              onChange={(e) => {
+                const pid = e.target.value;
+                setProv(pid);
+                const o = cfg.providers.find((x) => x.id === pid);
+                setModel(o ? o.model : '');
+              }}>
+              {ready.map((x) => (
+                <option key={x.id} value={x.id}>{x.label}</option>
+              ))}
+            </select>
+            <button type="button" className={'btn webTgl' + (web ? ' on' : '')}
+              aria-pressed={web} onClick={() => setWeb(!web)}
+              title={web ? '웹검색 켜짐 — 최신 정보를 찾아 출처와 함께 답합니다 (검색 요금 별도)'
+                         : '웹검색 꺼짐 — 내 데이터와 RAG 근거로만 답합니다'}>
+              🌐 웹검색 {web ? 'ON' : 'OFF'}</button>
+            <select className="btn" aria-label="모델" value={model}
+              onChange={(e) => setModel(e.target.value)}>
+              {provObj && !provObj.models.some((m) => m.id === model) && model ? (
+                <option value={model}>[직접] {model}</option>
+              ) : null}
+              {(provObj ? provObj.models : []).map((m) => (
+                <option key={m.id} value={m.id}>[{TIER_KO[m.tier]}] {m.label}</option>
+              ))}
+            </select>
+          </div>
+        ) : (
+          <p className="small" style={{color: 'var(--critical)'}}>
+            ⚠️ 등록된 AI 키가 없습니다 — 「AI 설정」 탭에서 키를 먼저 넣으십시오.</p>
+        )
+      ) : null}
+
+      <div className="aiLog">
+        {!msgs.length ? (
+          <p className="small" style={{color: 'var(--muted)'}}>
+            이 메뉴의 <b>실데이터</b>와 <b>RAG 원문 근거</b>를 함께 보고 답합니다.
+            데이터 문의·사용법·사업 아이디어 무엇이든 물어보세요.
+            (먼저 「AI 설정」 탭에서 키를 넣으셔야 합니다 — 비용은 지도사님 부담)
+          </p>
+        ) : null}
+        {msgs.map((m, i) => (
+          <div key={i} className={'aiMsg ' + m.role}>
+            {m.role === 'user' ? (
+              <div className="aiBubble u">
+                {m.tab && m.tab !== tab ? (
+                  <span className="small" style={{opacity: .7}}>[{TAB_LABEL[m.tab]}] </span>
+                ) : null}
+                {m.content}
+              </div>
+            ) : (
+              <div className="aiBubble a">
+                <div className="aiBody"><Markdown text={m.content} /></div>
+                {m.truncNote ? (
+                  <div className="small" style={{marginTop: 6, color: 'var(--critical)'}}>
+                    <Markdown text={'✂️ ' + m.truncNote} /></div>
+                ) : null}
+                {m.webNote ? (
+                  <div className="small" style={{marginTop: 6, color: 'var(--signal)'}}>
+                    <Markdown text={'⚠️ ' + m.webNote} /></div>
+                ) : null}
+                {(m.webCites || []).length ? (
+                  <div style={{marginTop: 6}}>
+                    <div className="small" style={{fontWeight: 600}}>
+                      🌐 웹 출처 {m.webCites.length}건</div>
+                    <ol className="webCite small">
+                      {m.webCites.map((c, k) => (
+                        <li key={k}>
+                          <a href={c.url} target="_blank" rel="noopener noreferrer">
+                            {c.title}</a>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                ) : (m.webAsked ? (
+                  <div className="small" style={{marginTop: 6, color: 'var(--muted)'}}>
+                    🌐 웹검색을 켰지만 <b>모델이 검색하지 않았습니다</b> —
+                    가진 자료로 충분하다고 판단한 것입니다.</div>
+                ) : null)}
+                {(m.sources || []).length ? (
+                  <details style={{marginTop: 6}}>
+                    <summary className="small">근거 원문 {m.sources.length}건</summary>
+                    {m.sources.map((h, k) => (
+                      <div key={k} className="knRag">
+                        <div className="small"><b>[{k + 1}]</b>{' '}
+                          <Chip k="info">{h.doc_type}</Chip> {h.title}</div>
+                        <blockquote className="small">{h.content}</blockquote>
+                      </div>
+                    ))}
+                  </details>
+                ) : null}
+                <div className="small" style={{color: 'var(--muted)', marginTop: 4}}>
+                  {m.provider} · {m.model}</div>
+              </div>
+            )}
+          </div>
+        ))}
+        {busy ? <p className="small">⏳ 근거를 모아 답하는 중…</p> : null}
+        {err ? (
+          <div className="small" style={{color: 'var(--critical)'}}>
+            ⚠️ {err}
+            {lastQ ? (
+              <button className="btn sm" style={{marginLeft: 8}}
+                onClick={() => ask(lastQ)}>다시 보내기</button>
+            ) : null}
+          </div>
+        ) : null}
+        <div ref={endRef} />
+      </div>
+
+      {!msgs.length ? (
+        <div className="chips" style={{marginBottom: 8}}>
+          {CHAT_CHIPS.map((c) => (
+            <button key={c.label} type="button" className="pill"
+              onClick={() => ask(c.q)}>{c.label}</button>
+          ))}
+        </div>
+      ) : null}
+
+      <div className="aiInput">
+        <input type="text" className="btn" value={inp} disabled={busy}
+          placeholder="질문 입력 — 예: 서울 청년 대상 공고 흐름은?"
+          onChange={(e) => setInp(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') ask(inp); }} />
+        <button className="btn pri" disabled={busy || !inp.trim()}
+          onClick={() => ask(inp)}>보내기</button>
+      </div>
+      <p className="small" style={{color: 'var(--muted)', margin: '6px 0 0'}}>
+        ⚠️ AI 답은 초안입니다 — 수치는 근거 원문과 대조하세요.</p>
+    </div>
+  );
+}
+
+
+/* ─────────────── 전역 AI 제안 (모든 탭에서) ─────────────── */
+
+function AIPropose({q, setQ, onClose}) {
+  const [st, setSt] = useState({state: 'idle'});
+  const [text, setText] = useState('');
+  useEffect(() => { setSt({state: 'idle'}); setText(''); }, [q]);
+
+  const run = () => {
+    if (!q.trim()) return;
+    setSt({state: 'run', msg: '시작하는 중…'});
+    fetch(API + '/api/ai/propose', {method: 'POST',
+      headers: {'Content-Type': 'application/json'}, body: JSON.stringify({q})})
+      .then((r) => r.json()).then((d) => {
+        if (d.error) { setSt({state: 'err', msg: d.error}); return; }
+        let miss = 0;
+        const poll = () => fetch(API + '/api/jobs?id=' + d.job).then((r) => r.json())
+          .then((j) => {
+            if (!j.id && j.error) {   // 404 — 그런 작업이 없다
+              setSt({state: 'err', msg: '작업 기록이 사라졌습니다 (서버 재시작?).'});
+              return;
+            }
+            miss = 0;
+            if (!j.done) { setSt({state: 'run', msg: j.current}); setTimeout(poll, 2000); return; }
+            if (!j.ok) {
+              setSt({state: 'err', msg: (j.error || j.current)
+                     + (j.hint ? ' — ' + j.hint.replace(/\*\*/g, '') : '')});
+              return;
+            }
+            setText(j.text || '');
+            setSt({state: 'ok', provider: j.provider, model: j.model,
+                   sources: j.sources || [], net: j.net_summary || []});
+          }).catch(() => {
+            if (++miss <= 5) { setTimeout(poll, 2000); return; }
+            setSt({state: 'err', msg: '서버 응답이 끊겼습니다 — 서버를 다시 띄워 보세요.'});
+          });
+        setTimeout(poll, 1200);
+      }).catch((e) => setSt({state: 'err', msg: e.message}));
+  };
+
+  return (
+    <div className="aiDrawer">
+      <div className="aiHead">
+        <b>✨ AI 사업 제안</b>
+        <button className="btn sm" onClick={onClose} aria-label="AI 제안 닫기">✕</button>
+      </div>
+      <input type="search" className="btn" style={{width: '100%', marginBottom: 8}}
+        placeholder="키워드 — 예: 명상 청년, 숲체험" value={q}
+        onChange={(e) => setQ(e.target.value)}
+        onKeyDown={(e) => { if (e.key === 'Enter') run(); }} />
+      {st.state === 'idle' ? (
+        <Fragment>
+          <p className="small">이 키워드의 <b>실측 공고 데이터</b>와 <b>RAG 원문 근거</b>를
+            함께 보내 사업 아이디어·근거 문장을 받습니다.</p>
+          <button className="btn pri" disabled={!q.trim()} onClick={run}>제안 받기</button>
+          <p className="small" style={{color: 'var(--muted)', marginTop: 6}}>
+            「AI 설정」 탭에서 키를 먼저 넣으셔야 합니다. 비용은 지도사님 계정에 청구됩니다.</p>
+        </Fragment>
+      ) : st.state === 'run' ? (
+        <p className="small">⏳ {st.msg}</p>
+      ) : st.state === 'err' ? (
+        <Fragment>
+          <p className="small" style={{color: 'var(--critical)'}}>⚠️ {st.msg}</p>
+          <button className="btn" onClick={run}>다시 시도</button>
+        </Fragment>
+      ) : (
+        <Fragment>
+          <div className="small" style={{color: 'var(--muted)', marginBottom: 6}}>
+            {st.provider} · {st.model}</div>
+          <div className="aiBody"><Markdown text={text} /></div>
+          {st.sources.length ? (
+            <details style={{marginTop: 10}}>
+              <summary className="small">근거 원문 {st.sources.length}건 — AI 가 본 것 그대로</summary>
+              {st.sources.map((h, i) => (
+                <div key={i} className="knRag">
+                  <div className="small"><b>[{i + 1}]</b>{' '}
+                    <Chip k="info">{h.doc_type}</Chip> {h.title}</div>
+                  <blockquote className="small">{h.content}</blockquote>
+                </div>
+              ))}
+            </details>
+          ) : null}
+          <p className="small" style={{color: 'var(--muted)', marginTop: 8}}>
+            ⚠️ AI 출력은 <b>초안</b>입니다. 수치·기관명은 반드시 원문과 대조하십시오.</p>
+        </Fragment>
+      )}
+    </div>
+  );
+}
+
+
 function Keywords({d}) {
   const [q, setQ] = useState('');
+  // 도메인(명상·심리치유) / 범용 지원사업 — 분석 축 전환.
+  // 게이트(발굴)는 언제나 도메인 사전을 쓴다. 이 토글은 **분석·AI 제안** 전용이다.
+  const [kwMode, setKwMode] = useState('domain');
+  useEffect(() => { window.CHOI_KWMODE = kwMode; }, [kwMode]);
+  useEffect(() => { window.CHOI_KWQ = q; return () => { window.CHOI_KWQ = ''; }; }, [q]);
+
+  // ── 칩 → 네트워크 연동 ──
+  // 선택 상태의 정본은 검색창 q 하나다(쉼표 목록). 칩을 누르면 q 에
+  // 넣고 빼며, 네트워크·별자리·RAG 는 q 를 보고 이미 움직인다.
+  const activeKws = q.split(',').map((x) => x.trim()).filter(Boolean);
+  const toggleKw = (w) => {
+    const parts = [...activeKws];
+    const i = parts.indexOf(w);
+    if (i >= 0) parts.splice(i, 1);
+    else {
+      if (parts.length >= 4) parts.shift();   // 서버 분석 상한 4개 — 오래된 것부터 밀어냄
+      parts.push(w);
+    }
+    setQ(parts.join(', '));
+    // 결과는 위(네트워크)에 나타난다 — 화면 밖이면 데려간다
+    const c = document.querySelector('.knCanvas');
+    if (parts.length && c) {
+      const r = c.getBoundingClientRect();
+      if (r.top < 0 || r.top > window.innerHeight * 0.6) {
+        c.scrollIntoView({block: 'center', behavior: 'smooth'});
+      }
+    }
+  };
+  // 칩을 고르는 중에는 사전 목록을 걸러내지 않는다 — 다음 칩을 계속
+  // 골라야 하는데 목록이 줄어들면 고를 수가 없다(자유 입력만 필터로 쓴다)
+  const chipFilter = activeKws.length ? '' : q.trim();
   const meta = {
     primary:   {label:'1차 — 하나만 맞아도 통과', tone:'ok'},
     secondary: {label:'2차 — 2개 조합 시 통과', tone:''},
     facility:  {label:'시설자금 트랙', tone:'info'},
     target:    {label:'대상 (청소년·기업·시니어)', tone:'info'},
     exclude:   {label:'제외어 — 오탐 방지', tone:'crit'},
+    field:     {label:'지원 분야', tone:'ok'},
+    biztype:   {label:'사업 유형', tone:''},
+    support:   {label:'지원 형태', tone:'info'},
   };
   return (
     <Fragment>
@@ -692,22 +2346,56 @@ function Keywords({d}) {
           실제 공고는 "웰니스관광 운영 지원"(힐링·명상 테마 포함), "국민마음회복 숲처방"(숲명상 포함) 같은 이름으로 나옵니다.
           그래서 사전을 <b>상위 프레임 축</b>으로 구성했습니다 — '명상' 단독 매칭에 의존하면 아무것도 못 잡습니다.</p>
       </Call>
+      <div className="srcTabs" role="tablist" style={{margin: '0 0 12px'}}>
+        <button className="srcTab" role="tab" aria-selected={kwMode === 'domain'}
+          onClick={() => setKwMode('domain')}>
+          🧘 도메인 — 명상·심리치유
+          <span>발굴 게이트가 쓰는 사전 · 통과 공고의 실측 매칭</span>
+        </button>
+        <button className="srcTab" role="tab" aria-selected={kwMode === 'general'}
+          onClick={() => setKwMode('general')}>
+          🌐 범용 지원사업
+          <span>분야·사업유형·지원형태 — 전 분야 트렌드와 범용 사업계획서</span>
+        </button>
+      </div>
+      {kwMode === 'general' ? (
+        <p className="small" style={{margin: '0 0 10px', color: 'var(--muted)'}}>
+          공고 전체(중복 제외)를 <b>분야·사업유형·지원형태</b> 축으로 봅니다.
+          발굴 게이트에는 영향이 없습니다 — 사전은
+          <span className="mono"> config\keywords_general.yaml</span> 을 고치면 됩니다.
+        </p>
+      ) : null}
       <div className="controls">
         <input type="search" aria-label="키워드 검색" value={q}
-               onChange={e => setQ(e.target.value)} placeholder="키워드 검색… (예: 명상, 채용)" />
+               onChange={e => setQ(e.target.value)}
+               placeholder="키워드 입력 또는 아래 단추 클릭 — 쉼표로 여러 개 (예: 문화, 관광)" />
+        {activeKws.length ? (
+          <button type="button" className="pill" onClick={() => setQ('')}>
+            선택 {activeKws.length}개 지우기</button>
+        ) : null}
         <span className="count">
-          {Object.values(d.keywords).flat().filter(w => !q || w.includes(q)).length.toLocaleString()}
+          {Object.values(d.keywords).flat().filter(w => !chipFilter || w.includes(chipFilter)).length.toLocaleString()}
           {' / '}{Object.values(d.keywords).flat().length.toLocaleString()}
         </span>
       </div>
-      {Object.entries(d.keywords).map(([k, arr]) => {
-        const hit = arr.filter(w => !q || w.includes(q));
-        if (q && !hit.length) return null;
+      <KeyNet q={q} mode={kwMode} />
+      {Object.entries(kwMode === 'general'
+                       ? (d.keywords_general || {}) : d.keywords).map(([k, arr]) => {
+        const hit = arr.filter(w => !chipFilter || w.includes(chipFilter));
+        if (chipFilter && !hit.length) return null;
         return (
           <div className="panel" key={k} style={{marginBottom:'.8rem'}}>
             <h3>{k} <span className="mono small" style={{fontWeight:400}}>
-              · {q ? `${hit.length} / ${arr.length}` : arr.length}개 — {meta[k]?.label}</span></h3>
-            <div className="chips">{hit.map((w, i) => <Chip key={i} k={meta[k]?.tone}>{w}</Chip>)}</div>
+              · {chipFilter ? `${hit.length} / ${arr.length}` : arr.length}개 — {meta[k]?.label}</span></h3>
+            <div className="chips">{hit.map((w, i) => (
+              <button key={i} type="button"
+                className={'kwChip t-' + (meta[k]?.tone || 'plain')
+                           + (activeKws.includes(w) ? ' on' : '')}
+                title={activeKws.includes(w)
+                       ? '분석에서 빼기'
+                       : '누르면 네트워크·RAG 분석 (여러 개 가능, 최대 4)'}
+                onClick={() => toggleKw(w)}>{w}</button>
+            ))}</div>
           </div>
         );
       })}
@@ -782,238 +2470,6 @@ function Market({d, live}) {
   );
 }
 
-/* ─────────────── 탭: 프로필 ─────────────── */
-
-function Field({label, value, hint}) {
-  const empty = value == null || value === '';
-  return (
-    <div style={{display:'flex', gap:'.8rem', padding:'.5rem 0', borderBottom:'1px solid var(--rule)'}}>
-      <span className="small" style={{width:'8rem', flex:'0 0 auto'}}>{label}</span>
-      {empty
-        ? <span className="small" style={{color:'var(--muted)', fontStyle:'italic'}}>미확인{hint ? ` — ${hint}` : ''}</span>
-        : <span>{value}</span>}
-    </div>
-  );
-}
-
-function Profile({d}) {
-  const p = d.profile || {};
-  const hasName = !!p.name;
-  const certs = p.certifications || [];
-  const edu = p.education || [];
-  const pubs = p.publications || [];
-  const career = p.career || {};
-  const history = career.history || [];
-  const org = p.organization || {};
-  const track = p.track_record || {};
-  const contact = p.contact || {};
-  const target = p.target_priority || {};
-  const region = p.region_priority || {};
-
-  if (!hasName) {
-    return (
-      <Fragment>
-        <h2 className="sec-title">프로필</h2>
-        <Call tone="warn" label="프로필 없음">
-          <p><span className="mono">config/profile.yaml</span> 을 찾지 못했거나 비어 있습니다.
-            프로젝트 루트에서 파일을 만든 뒤 <span className="mono">python dashboard/build_data.py</span> 를 다시 실행하세요.</p>
-        </Call>
-      </Fragment>
-    );
-  }
-
-  return (
-    <Fragment>
-      <h2 className="sec-title">프로필 — {p.name}{org.title ? ` ${org.title}` : (p.title ? ` ${p.title}` : '')}</h2>
-      <p className="sec-desc">공고 적합도 스코어링과 사업계획서 오너 인터뷰(Phase 2)의 기초 데이터입니다.
-        <span className="mono"> config/profile.yaml</span> 을 직접 편집하면 이 화면에 그대로 반영됩니다(NFR-01) — 대시보드는 이 파일을 읽기만 합니다.
-        {p.source && <Fragment> 원본 서식: <span className="mono">{p.source}</span></Fragment>}</p>
-
-      <dl className="kpis">
-        <Kpi label="경력" value={career.years ? `${career.years}년` : '미확인'} note={career.scope || ''} />
-        <Kpi label="주력 분야" value={p.main_field || '미확인'} note={p.secondary_field ? `+ ${p.secondary_field}` : ''} />
-        <Kpi label="학위" value={edu.length ? (edu[edu.length-1].degree || '') : '미확인'} note={edu.length ? edu[edu.length-1].major : ''} />
-        <Kpi label="자격증" value={certs.length} tone={certs.length ? 'ok' : 'warn'} note={certs.length ? '' : '미등록'} />
-      </dl>
-
-      <div className="panel">
-        <h3>기본 정보</h3>
-        <Field label="이름" value={p.name} />
-        <Field label="직함" value={org.title || p.title} />
-        <Field label="소속기관" value={org.name} hint="TODO" />
-        <Field label="업종 분야" value={org.field} />
-        <Field label="기관 주소" value={org.address} hint="TODO" />
-        <Field label="연락처" value={[contact.phone, contact.email].filter(Boolean).join(' · ')} hint="TODO" />
-        {(() => {
-          const br = p.business_registration;
-          if (br && typeof br === 'object') {
-            return (
-              <Fragment>
-                <Field label="사업자등록번호" value={br.number} />
-                <Field label="과세 유형" value={br.status} />
-                <Field label="개업일" value={br.opened_at} />
-                <Field label="발급기관" value={br.issuing_office} />
-                <Field label="업태·종목" value={(br.business_type || []).join(' / ')} />
-                {br.note && <Call tone="warn" style={{marginTop:'.6rem'}}><p className="small">{br.note}</p></Call>}
-              </Fragment>
-            );
-          }
-          return <Field label="사업자등록번호" value={br} hint="TODO" />;
-        })()}
-      </div>
-
-      <div className="panel" style={{marginTop:'1rem'}}>
-        <h3>학력 {edu.length}건</h3>
-        {edu.length === 0 ? (
-          <p className="small">등록된 학력이 없습니다.</p>
-        ) : (
-          <ul style={{paddingLeft:'1.2rem', margin:0}}>
-            {edu.map((e, i) => (
-              <li key={i} className="small" style={{marginBottom:'.3rem'}}>
-                <span className="mono">{e.period}</span> · {e.school} {e.major}<b> {e.degree}</b>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <div className="panel" style={{marginTop:'1rem'}}>
-        <h3>경력·실적</h3>
-        <Field label="주력 분야" value={p.main_field} />
-        <Field label="지자체·공공기관 위탁" value={career.years ? `${career.years}년 (${career.scope || ''})` : null} />
-        <Field label="사업 형태" value={career.business_type} />
-        <Field label="참여 규모" value={track.participants_mentioned ? `약 ${track.participants_mentioned.toLocaleString()}명 언급` : null} />
-        {track.participants_mentioned != null && !track.verified && (
-          <Call tone="warn" label="검증 필요" style={{marginTop:'.6rem'}}>
-            <p>회의록 STT 자동전사에서 나온 수치라 오인식 가능성이 있습니다.
-              최은희 지도사가 확인하면 <span className="mono">config/profile.yaml</span> 의 <span className="mono">track_record.verified</span> 를 <span className="mono">true</span> 로 바꿔주세요.</p>
-          </Call>
-        )}
-        {history.length > 0 && (
-          <Fragment>
-            <p className="small" style={{margin:'.9rem 0 .4rem'}}><b>경력 이력</b></p>
-            <ul style={{paddingLeft:'1.2rem', margin:0}}>
-              {history.map((h, i) => (
-                <li key={i} className="small" style={{marginBottom:'.3rem'}}>
-                  <span className="mono">{h.period}</span> · {h.org}{h.role ? ` — ${h.role}` : ''}{h.work ? ` (${h.work})` : ''}
-                </li>
-              ))}
-            </ul>
-          </Fragment>
-        )}
-      </div>
-
-      <div className="panel" style={{marginTop:'1rem'}}>
-        <h3>자격증 {certs.length}건</h3>
-        {certs.length === 0 ? (
-          <p className="small">등록된 자격증이 없습니다 — <span className="mono">config/profile.yaml</span> 의 <span className="mono">certifications</span> 에 추가해주세요.</p>
-        ) : (
-          <ul style={{paddingLeft:'1.2rem', margin:0}}>
-            {certs.map((c, i) => (
-              <li key={i} className="small" style={{marginBottom:'.3rem'}}>
-                {typeof c === 'string' ? c : `${c.name || ''}${c.issuer ? ` — ${c.issuer}` : ''}${c.date ? ` (${c.date})` : c.year ? ` (${c.year})` : ''}`}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      {pubs.length > 0 && (
-        <div className="panel" style={{marginTop:'1rem'}}>
-          <h3>논문·특기사항 {pubs.length}건</h3>
-          <p className="small" style={{marginTop:0}}>사업계획서 "수행역량" 섹션의 근거 인용 후보입니다(§5.3.7 RAG 검색 대상 — 과거제안서 축과 함께 사용).</p>
-          <ul style={{paddingLeft:'1.2rem', margin:0}}>
-            {pubs.map((x, i) => (
-              <li key={i} className="small" style={{marginBottom:'.3rem'}}>
-                <Chip>{x.type}</Chip> {x.title}{x.venue ? ` — ${x.venue}` : ''}{x.year ? ` (${x.year})` : ''}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <div className="panel" style={{marginTop:'1rem'}}>
-        <h3>타깃·지역 우선순위 <Chip k="warn">미확정</Chip></h3>
-        <Field label="타깃 후보" value={(target.candidates || []).join(' · ')} />
-        <Field label="타깃 확정" value={target.confirmed} hint="PRD Q2 — 미확정" />
-        <Field label="지역 기본" value={region.default} />
-        <Field label="지역 우선" value={region.emphasis} />
-        {region.assumed && (
-          <Call tone="info" style={{marginTop:'.6rem'}}>
-            <p>지역 범위는 아직 최은희 지도사가 직접 확정하지 않은 <b>가정치</b>입니다(ADR-006 근거로 전국 기본 + 서울 우선을 가정). PRD §8 Q3 참조.</p>
-          </Call>
-        )}
-      </div>
-    </Fragment>
-  );
-}
-
-/* ─────────────── 탭: 전문가 풀 ─────────────── */
-
-function Experts({d}) {
-  const experts = d.experts || [];
-  const [q, setQ] = useState('');
-  const [type, setType] = useState('전체');
-
-  const types = useMemo(() => ['전체', ...new Set(experts.map(e => e.type))], [experts]);
-  const rows = useMemo(() => experts.filter(e => {
-    if (type !== '전체' && e.type !== type) return false;
-    if (!q) return true;
-    const s = q.toLowerCase();
-    return ['name','program','affiliation','qualification','contact']
-      .some(k => (e[k] || '').toLowerCase().includes(s));
-  }), [experts, q, type]);
-
-  const typeRows = useMemo(() => {
-    const m = {};
-    experts.forEach(e => { m[e.type] = (m[e.type] || 0) + 1; });
-    return Object.entries(m).map(([label, value]) => ({label, value})).sort((a,b) => b.value - a.value);
-  }, [experts]);
-
-  return (
-    <Fragment>
-      <h2 className="sec-title">전문가 풀 {experts.length}건</h2>
-      <p className="sec-desc">"프로그램명 → 섭외 가능한 전문가" 인덱스입니다. 공고 하나를 보고
-        <b> 이 프로그램에 누구를 섭외하지, 어떻게 연락하지</b>를 바로 찾을 때 씁니다.
-        원본은 <span className="mono">docs/research/P2_프로그램명_전문가인덱스.md</span> — 이 파일을 고치고
-        다시 빌드하면 여기도 그대로 바뀝니다.</p>
-      <Call tone="warn" label="전제 — 플랫폼은 제휴 주체가 아니다">
-        <p>웃는코끼리·마보·하루명상은 개인사업자·프리랜서 전문가가 자기 프로그램을 올려두는 장터/앱입니다.
-          기관 대 기관 MOU로 소속 전문가 전원을 대표하지 못합니다. <b>제휴는 언제나 개인 전문가 단위</b>로
-          이뤄집니다 — 그래서 "소속"란에는 항상 그 사람의 실제 소속기관을 적었고, 플랫폼명은 어디서 찾았는지
-          참고용으로만 남겼습니다.</p>
-      </Call>
-      <div className="panel" style={{marginBottom:'1.1rem'}}>
-        <h3>유형별 분포</h3>
-        <Bars rows={typeRows} />
-      </div>
-      <div className="controls">
-        <input type="search" aria-label="전문가 검색" value={q}
-               onChange={e => setQ(e.target.value)} placeholder="이름·프로그램·소속·자격·연락처 검색…" />
-        <select aria-label="유형 필터" value={type} onChange={e => setType(e.target.value)}>
-          {types.map(t => <option key={t} value={t}>{t === '전체' ? '유형 — 전체' : t}</option>)}
-        </select>
-        <span className="count">{rows.length.toLocaleString()} / {experts.length.toLocaleString()}</span>
-      </div>
-      <DataTable
-        emptyHint={q ? `"${q}" 로는 찾지 못했습니다.` : '선택한 유형에 해당하는 전문가가 없습니다.'}
-        onReset={() => { setQ(''); setType('전체'); }}
-        csvName="choi_전문가풀.csv"
-        initialSort={{key:'type', dir:'asc'}}
-        columns={[
-          {key:'type', label:'유형', render:r => <Chip>{r.type}</Chip>},
-          {key:'program', label:'프로그램'},
-          {key:'name', label:'이름', render:r => <b>{r.name}</b>},
-          {key:'affiliation', label:'소속', render:r => <span className="small">{r.affiliation}</span>},
-          {key:'qualification', label:'자격', render:r => <span className="small">{r.qualification}</span>},
-          {key:'contact', label:'연락처', render:r => <span className="mono small">{r.contact}</span>},
-        ]}
-        rows={rows}
-      />
-    </Fragment>
-  );
-}
-
 /* ─────────────── 탭: 구현 계획 ─────────────── */
 
 function Roadmap({d}) {
@@ -1066,6 +2522,136 @@ function Roadmap({d}) {
           {key:'basis', label:'근거 서식·절차', render:r => <span className="small">{r.basis}</span>},
         ]} rows={d.pms_model} />
       </div>
+    </Fragment>
+  );
+}
+
+/* ─────────────── 탭: 사용법 ───────────────
+   사용설명서.md 를 **서버에서 읽어** 렌더한다. 내용을 여기 복사해 두면
+   문서를 고쳤을 때 둘이 갈라진다 — 고칠 곳은 언제나 사용설명서.md 하나다. */
+
+// 이 문서가 쓰는 마크다운만 다룬다 (제목·표·목록·인용·코드·굵게).
+// 외부 라이브러리를 안 쓰는 이유: 무빌드 단일 파일 원칙(ADR-015)과
+// CSP. 60줄이면 충분하고, 무엇을 지원하는지 눈으로 확인할 수 있다.
+function mdInline(s) {
+  const out = [];
+  const re = /(\*\*[^*]+\*\*|`[^`]+`|\[[^\]]+\]\([^)]+\))/g;
+  let last = 0, m;
+  while ((m = re.exec(s))) {
+    if (m.index > last) out.push(s.slice(last, m.index));
+    const t = m[0];
+    if (t.startsWith('**')) out.push(<b key={m.index}>{t.slice(2, -2)}</b>);
+    else if (t.startsWith('`')) out.push(<code key={m.index}>{t.slice(1, -1)}</code>);
+    else {
+      const cut = t.indexOf('](');
+      out.push(<b key={m.index}>{t.slice(1, cut)}</b>);   // 링크는 글자만 (로컬 경로라 클릭 무의미)
+    }
+    last = m.index + t.length;
+  }
+  if (last < s.length) out.push(s.slice(last));
+  return out;
+}
+
+function Markdown({text}) {
+  const lines = String(text || '').split('\n');
+  const blocks = [];
+  let i = 0, key = 0;
+  while (i < lines.length) {
+    const l = lines[i];
+    if (l.startsWith('```')) {                       // 코드 블록
+      const buf = [];
+      i++;
+      while (i < lines.length && !lines[i].startsWith('```')) buf.push(lines[i++]);
+      i++;
+      blocks.push(<pre key={key++} className="md-pre">{buf.join('\n')}</pre>);
+    } else if (/^\|/.test(l) && /^\|[\s:|-]+\|?$/.test(lines[i + 1] || '')) {
+      const head = l.split('|').slice(1, -1).map(c => c.trim());
+      i += 2;
+      const rows = [];
+      while (i < lines.length && /^\|/.test(lines[i])) {
+        rows.push(lines[i].split('|').slice(1, -1).map(c => c.trim()));
+        i++;
+      }
+      blocks.push(
+        <div key={key++} style={{overflowX: 'auto'}}>
+          <table className="md-table">
+            <thead><tr>{head.map((h, j) => <th key={j}>{mdInline(h)}</th>)}</tr></thead>
+            <tbody>{rows.map((r, j) => (
+              <tr key={j}>{r.map((c, k) => <td key={k}>{mdInline(c)}</td>)}</tr>))}</tbody>
+          </table>
+        </div>);
+    } else if (/^#{1,4}\s/.test(l)) {
+      const lv = l.match(/^#+/)[0].length;
+      const txt = l.replace(/^#+\s*/, '');
+      blocks.push(lv <= 2
+        ? <h3 key={key++} className="sec-title" style={{marginTop: 26}}>{mdInline(txt)}</h3>
+        : <h4 key={key++} style={{margin: '18px 0 6px', fontSize: '.95rem'}}>{mdInline(txt)}</h4>);
+      i++;                    // ← 이 줄을 빠뜨려 무한 루프가 났었다. 모든 분기는 i 를 전진시켜야 한다.
+    } else if (/^>\s?/.test(l)) {
+      const buf = [];
+      while (i < lines.length && /^>\s?/.test(lines[i])) buf.push(lines[i++].replace(/^>\s?/, ''));
+      blocks.push(<blockquote key={key++} className="md-quote">{
+        buf.map((b, j) => <div key={j}>{mdInline(b)}</div>)}</blockquote>);
+    } else if (/^\s*\d+[.)]\s/.test(l)) {          // 번호 목록
+      const buf = [];
+      let start = parseInt(l.match(/\d+/)[0], 10) || 1;
+      while (i < lines.length && /^\s*\d+[.)]\s/.test(lines[i])) {
+        buf.push(lines[i++].replace(/^\s*\d+[.)]\s*/, ''));
+      }
+      blocks.push(<ol key={key++} className="md-ol" start={start}>{
+        buf.map((b, j) => <li key={j}>{mdInline(b)}</li>)}</ol>);
+    } else if (/^[-*]\s/.test(l)) {
+      const buf = [];
+      while (i < lines.length && /^[-*]\s/.test(lines[i])) buf.push(lines[i++].replace(/^[-*]\s/, ''));
+      blocks.push(<ul key={key++} className="md-ul">{
+        buf.map((b, j) => <li key={j}>{mdInline(b)}</li>)}</ul>);
+    } else if (l.trim() === '' || /^-{3,}$/.test(l.trim())) {
+      i++;
+    } else {
+      const buf = [];
+      while (i < lines.length && lines[i].trim()
+             && !/^[#>|`\-*]/.test(lines[i])
+             && !/^\s*\d+[.)]\s/.test(lines[i])) buf.push(lines[i++]);
+      if (buf.length) {
+        // 깨진 표에서 흘러나온 파이프를 정리한다 — 「| [3] |」 같은 잔해
+        const txt = buf.join(' ').replace(/\s*\|\s*/g, ' ').trim();
+        if (txt) blocks.push(<p key={key++} className="md-p">{mdInline(txt)}</p>);
+      }
+      else i++;
+    }
+  }
+  return <Fragment>{blocks}</Fragment>;
+}
+
+function Guide() {
+  const [md, setMd] = useState(null);
+  const [err, setErr] = useState('');
+  useEffect(() => {
+    fetch(API + '/api/guide')
+      .then((r) => r.json())
+      .then((d) => d.ok ? setMd(d.markdown) : setErr(d.error || '읽지 못했습니다'))
+      .catch(() => setErr('서버가 없습니다 — 바탕화면 아이콘을 눌러 서버를 띄우세요'));
+  }, []);
+  // 큰 제목(##)만 뽑아 목차를 만든다 — 275줄을 위아래로 훑지 않게
+  const toc = (md || '').split('\n')
+    .filter((l) => /^##\s/.test(l))
+    .map((l) => l.replace(/^##\s*/, ''));
+  return (
+    <Fragment>
+      <h2 className="sec-title">사용법</h2>
+      <p className="sec-desc">
+        이 시스템을 쓰는 법 전체입니다. 원본은 <code>사용설명서.md</code> —
+        그 파일을 고치면 이 화면도 함께 바뀝니다.
+      </p>
+      {err ? <Call tone="warn" label="알림">{err}</Call> : null}
+      {md === null && !err ? <p className="small">불러오는 중…</p> : null}
+      {toc.length > 0 ? (
+        <div className="panel" style={{padding: '10px 14px', marginBottom: 18}}>
+          <div className="small" style={{marginBottom: 6}}>이 문서에 있는 것</div>
+          <div className="chips">{toc.map((t, i) => <Chip key={i}>{t}</Chip>)}</div>
+        </div>
+      ) : null}
+      {md ? <div className="md-body"><Markdown text={md} /></div> : null}
     </Fragment>
   );
 }
@@ -1147,7 +2733,842 @@ function OpenQuestions({items}) {
 /* ─────────────── 앱 ─────────────── */
 
 // group 은 성격이다 — 진단(무엇을 알았나) / 자료(무엇을 찾았나) / 실행(무엇을 할까)
+
+// ─────────────── 작성 준비 (Step 2.4) ───────────────
+// file:// 로 여는 무빌드 앱이라 브라우저가 로컬 파일에 쓸 수 없다.
+// 그래서 이 탭은 "무엇을 어디에 두어야 하는지" 를 정확히 알려주고
+// 명령·본문을 클립보드로 넘긴다. 실제 파일 작업은 Claude Code 가 한다(ADR-002).
+
+// 서버가 있으면 그쪽으로, 없으면 빈 문자열(같은 오리진)
+const API = (location.protocol === 'file:') ? 'http://127.0.0.1:8777' : '';
+
+const KEY_HINTS = [
+  {k: '자격', re: /(신청\s*자격|지원\s*자격|응모\s*자격|자격\s*요건|제외\s*대상)/g},
+  {k: '배점', re: /(심사\s*기준|평가\s*기준|배점|심사\s*항목|평가\s*항목)/g},
+  {k: '서류', re: /(제출\s*서류|구비\s*서류|첨부\s*서류|필수\s*서류)/g},
+  {k: '예산', re: /(사업비|지원\s*금액|예산|보조금)/g},
+  {k: '기간', re: /(사업\s*기간|수행\s*기간|접수\s*기간|신청\s*기간)/g},
+];
+
+const OWNER_DOCS = [
+  ['사업자등록증', '법인격 확인 — G1 자격 게이트가 이걸 본다'],
+  ['자격증', '명상·상담 지도자 자격 — 수행역량 배점'],
+  ['결과보고서', '유사사업 수행실적 — 대개 배점이 크다'],
+  ['프로그램 계획서', '사업 내용 서술의 원재료'],
+  ['통장 사본', '제출서류 (공고별 상이)'],
+  ['협약서', '협력기관 연계 증빙'],
+];
+
+function copyText(t) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(t);
+  } catch (e) {}
+  // file:// 은 secure context 가 아니라 clipboard API 가 막힌다 — 폴백
+  const ta = document.createElement('textarea');
+  ta.value = t;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); } catch (e) {}
+  document.body.removeChild(ta);
+  return Promise.resolve();
+}
+
+function CopyBtn({text, label, pri}) {
+  const [done, setDone] = useState(false);
+  return (
+    <button className={'btn' + (pri ? ' pri' : '')} disabled={!text}
+      onClick={() => { copyText(text); setDone(true); setTimeout(() => setDone(false), 1400); }}>
+      {done ? '\u2713 복사됨' : (label || '복사')}
+    </button>
+  );
+}
+
+function fmtSize(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b / 1024).toFixed(0) + ' KB';
+  return (b / 1048576).toFixed(1) + ' MB';
+}
+
+
+
+
+// ─────────────── 작성 진행 모니터링 ───────────────
+// 서버가 사업계획서\ 폴더를 직접 읽는다(/api/proposals).
+// Claude Code 가 초안을 쓰면 DB 를 거치지 않아도 5초 안에 여기 반영된다.
+
+function fmtAgo(ts) {
+  const sec = Math.max(0, Date.now() / 1000 - ts);
+  if (sec < 90) return '방금';
+  if (sec < 3600) return Math.round(sec / 60) + '분 전';
+  if (sec < 86400) return Math.round(sec / 3600) + '시간 전';
+  return Math.round(sec / 86400) + '일 전';
+}
+
+function ProposalMonitor() {
+  const [rows, setRows] = useState(null);
+  const [msg, setMsg] = useState('');
+  const [stale, setStale] = useState(false);   // 서버가 죽어도 옛 스냅샷이 '실시간'인 척하지 않게
+  useEffect(() => {
+    let alive = true;
+    const load = () => fetch(API + '/api/proposals')
+      .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
+      .then((d) => { if (alive) { setRows(d.proposals || []); setStale(false); } })
+      .catch(() => { if (alive) setStale(true); });
+    load();
+    const t = setInterval(load, 5000);
+    return () => { alive = false; clearInterval(t); };
+  }, []);
+
+  const [cap, setCap] = useState({});      // 이 PC 에 뭐가 깔려 있나
+  useEffect(() => {
+    fetch(API + '/api/health').then((r) => r.json())
+      .then((d) => setCap(d)).catch(() => {});
+  }, []);
+
+  const openFolder = (path, mode) => {
+    fetch(API + '/api/open', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({path: path, mode: mode}),
+    }).then((r) => r.json())
+      .then((r) => setMsg(r.ok ? '열었습니다 — ' + r.message : '실패: ' + (r.error || '')))
+      .catch(() => setMsg('서버 응답 없음'));
+  };
+
+  // 작업은 한 번에 하나다 — 최근에 손댄 폴더 하나만 크게 보여주고,
+  // 나머지는 접어 둔다. 지우지 않는 이유: 폴더는 각각 독립된 작성물이고
+  // (1617 완료본, 1665 신규) 목록에서 사라지면 "내 작업이 없어졌다"가 된다.
+  const [showAll, setShowAll] = useState(false);
+  if (!rows || !rows.length) return null;
+  const sorted = [...rows].sort((a, b) => (b.mtime || 0) - (a.mtime || 0));
+  const shown = showAll ? sorted : sorted.slice(0, 1);
+  const hidden = sorted.length - 1;
+  return (
+    <section style={{margin: '18px 0 22px'}}>
+      <h3 className="sec-title" style={{fontSize: 15, marginBottom: 8}}>
+        작성 진행 <span className="small" style={{fontWeight: 400}}>
+          {stale ? '— 서버 연결 끊김 · 아이콘을 다시 눌러 주세요'
+                 : showAll ? '— 전체 ' + sorted.length + '개'
+                 : '— 지금 작업 중인 것'}</span>
+        {hidden > 0 ? (
+          <button className="btn sm" style={{marginLeft: 10}}
+            onClick={() => setShowAll(!showAll)}>
+            {showAll ? '접기' : '이전 작성 ' + hidden + '개 보기'}
+          </button>
+        ) : null}
+      </h3>
+      {shown.map((p) => (
+        <div key={p.folder} className="panel"
+          style={{marginBottom: 8, padding: '10px 14px'}}>
+          <div style={{display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center'}}>
+            <b style={{fontSize: '.85rem', flex: '1 1 240px', minWidth: 0,
+                       overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
+              {p.folder}</b>
+            <span className="small">{p.progress}/4 단계 · {fmtAgo(p.mtime)}</span>
+            <button className="btn sm"
+              title="탐색기로 작성 폴더만 엽니다"
+              onClick={() => openFolder(p.path, '')}>폴더</button>
+            <button className="btn sm"
+              disabled={cap.claude_cli === false}
+              title={cap.claude_cli === false
+                ? 'claude 명령을 찾지 못했습니다 (CLI 미설치)'
+                : '명령창에서 Claude Code 를 이 폴더로 엽니다'}
+              onClick={() => openFolder(p.path, 'cli')}>터미널</button>
+            <button className="btn sm"
+              disabled={cap.claude_desktop === false}
+              title={cap.claude_desktop === false
+                ? 'Claude Desktop 이 설치돼 있지 않습니다'
+                : 'Claude Desktop 앱에서 이 폴더를 프로젝트로 엽니다'}
+              onClick={() => openFolder(p.path, 'desktop')}>데스크탑</button>
+            <button className="btn pri sm"
+              title="터미널과 데스크탑을 함께 엽니다"
+              onClick={() => openFolder(p.path, 'both')}>둘 다 열기</button>
+          </div>
+          <div className="chips" style={{marginTop: 8, alignItems: 'center'}}>
+            {p.steps.map((st, i) => (
+              <React.Fragment key={st.k}>
+                {i > 0 && <span className="small" style={{color: 'var(--muted)'}}>→</span>}
+                <Chip k={st.done ? 'ok' : ''}>
+                  {st.done ? '✓ ' : ''}{st.k}{st.n ? ' ' + st.n : ''}
+                </Chip>
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+      ))}
+      {msg ? <div className="small" style={{marginTop: 4}}>{msg}</div> : null}
+    </section>
+  );
+}
+
+
+function Prepare() {
+  const [srv, setSrv] = useState(null);        // null=확인중, false=서버없음
+  const [nid, setNid] = useState('');
+  const [slug, setSlug] = useState('');
+  const [notices, setNotices] = useState([]);
+  const [noticeErr, setNoticeErr] = useState('');   // 공고 목록이 빈 '이유'
+  const [body, setBody] = useState('');
+  const [jobs, setJobs] = useState([]);        // 업로드 이력 (모니터링)
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState('');
+
+  useEffect(() => {
+    fetch(API + '/api/health')
+      .then((r) => r.json())
+      .then((h) => { setSrv(h); return fetch(API + '/api/notices'); })
+      .then((r) => r.json())
+      .then((d) => {
+        setNotices(d.notices || []);
+        // 서버가 이유를 보내면 반드시 화면에 띄운다. 예전에는 error 를 버려서
+        // DB 접속 실패가 「공고 0건」으로만 보였다 — 사용자는 "공고가 없나 보다"
+        // 라고 오해하고, 진짜 원인(비밀번호 교체 후 서버 미재시작)을 못 찾는다.
+        if (d.error) setNoticeErr(d.error);
+      })
+      .catch(() => setSrv(false));
+  }, []);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('choi-prepare');
+      if (raw) { const v = JSON.parse(raw); setNid(v.nid || ''); setSlug(v.slug || ''); setBody(v.body || ''); }
+    } catch (e) {}
+  }, []);
+  useEffect(() => {
+    try { localStorage.setItem('choi-prepare', JSON.stringify({nid, slug, body})); } catch (e) {}
+  }, [nid, slug, body]);
+
+  // 폴더 경로도 서버가 준 값을 우선한다. 목록에 없는 공고(직접 ID 입력)일 때만
+  // 화면에서 조립하되, 그건 어디까지나 표시용 추정임을 사용자가 알 수 있게 한다.
+  const picked = notices.find((x) => String(x.id) === String(nid));
+  const folder = picked && picked.folder
+    ? picked.folder.replace(/\//g, '\\')
+    : '사업계획서\\' + (nid ? nid + '_' + (slug || '무제') : '<공고ID>_<약칭>');
+  const folderKnown = !!(picked && picked.folder);
+  const cmdMake = nid ? 'python -m choi propose --notice-id ' + nid : '';
+
+  // 폴더를 **실제로** 만든다. 근거팩 RAG 회수 때문에 1~3분 걸리므로
+  // 작업(job)을 만들고 진행 상황을 폴링한다 — 동기로 하면 브라우저가 끊긴다.
+  const [mk, setMk] = useState(null);        // {state, msg, folder, made}
+  const makeFolder = (force) => {
+    if (!srv) { setMk({state: 'err', msg: '서버가 없어 만들 수 없습니다.'}); return; }
+    if (!nid) { setMk({state: 'err', msg: '먼저 공고를 고르세요.'}); return; }
+    setMk({state: 'run', msg: '시작하는 중…'});
+    fetch(API + '/api/propose', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({notice_id: nid, force: !!force}),
+    }).then((r) => r.json()).then((d) => {
+      if (d.error) { setMk({state: 'err', msg: d.error}); return; }
+      const poll = () => fetch(API + '/api/jobs?id=' + d.job)
+        .then((r) => r.json()).then((j) => {
+          if (!j || j.error) { setMk({state: 'err', msg: '작업을 찾지 못했습니다.'}); return; }
+          if (!j.done) { setMk({state: 'run', msg: j.current || '진행 중…'}); setTimeout(poll, 1500); return; }
+          setMk(j.ok
+            ? {state: 'ok', msg: j.current, folder: j.folder, made: (j.made || []).length}
+            : {state: 'err', msg: j.current});
+        }).catch(() => setMk({state: 'err', msg: '서버 응답이 끊겼습니다.'}));
+      setTimeout(poll, 800);
+    }).catch((e) => setMk({state: 'err', msg: e.message}));
+  };
+
+  // ── 목록에 없는 공고문으로 시작 (터미널 없이) ──
+  // 왜 필요한가 — 대시보드 목록은 수집된 공고뿐이다. 민간 제안요청서·이메일로
+  // 받은 공고문은 여기 없어서, 예전에는 터미널에 긴 경로를 손으로 쳐야 했다.
+  // 코딩을 모르는 오너에게 그게 가장 실수하기 쉬운 단계였다.
+  const [src, setSrc] = useState('list');   // 'list' | 'rfp'
+  const [inbox, setInbox] = useState([]);
+  const [rfpName, setRfpName] = useState('');
+  const [rfp, setRfp] = useState(null);
+  // 2·3단계 업로드가 어느 폴더로 갈지 — RFP 갈래에서 이게 없으면 목적지가 없다
+  const [rfpActive, setRfpActive] = useState('');
+  const loadInbox = () => fetch(API + '/api/inbox').then((r) => r.json())
+    .then((d) => setInbox(d.inbox || [])).catch(() => {});
+  useEffect(() => { if (srv) loadInbox(); }, [srv]);
+
+  const uploadRfp = (files) => {
+    const nm = (rfpName || '').trim();
+    if (!nm) { setRfp({state: 'err', msg: '먼저 사업명을 적어 주세요.'}); return; }
+    const fd = new FormData();
+    files.forEach((f) => fd.append('files', f));
+    fd.append('category', '받은공고문');
+    fd.append('slug', nm);
+    fd.append('notice_id', '0');
+    setRfp({state: 'run', msg: '올리는 중…'});
+    fetch(API + '/api/upload', {method: 'POST', body: fd})
+      .then((r) => r.json()).then((d) => {
+        if (d.error) { setRfp({state: 'err', msg: d.error}); return; }
+        const poll = () => fetch(API + '/api/jobs?id=' + d.job).then((r) => r.json())
+          .then((j) => {
+            if (!j.done) { setRfp({state: 'run', msg: j.current || '처리 중…'}); setTimeout(poll, 1200); return; }
+            setRfp({state: 'ok', msg: `${(j.files || []).length}개 저장됨 — 이제 [작성 폴더 만들기]`});
+            loadInbox();
+          }).catch(() => setRfp({state: 'err', msg: '서버 응답 없음'}));
+        setTimeout(poll, 700);
+      }).catch((e) => setRfp({state: 'err', msg: e.message}));
+  };
+
+  const makeFromRfp = (name, force) => {
+    setRfp({state: 'run', msg: '시작하는 중…'});
+    fetch(API + '/api/propose-rfp', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({name: name, title: name, force: !!force}),
+    }).then((r) => r.json()).then((d) => {
+      if (d.error) { setRfp({state: 'err', msg: d.error}); return; }
+      const poll = () => fetch(API + '/api/jobs?id=' + d.job).then((r) => r.json())
+        .then((j) => {
+          if (!j.done) { setRfp({state: 'run', msg: j.current || '진행 중…'}); setTimeout(poll, 1500); return; }
+          // 만든 즉시 2·3단계 대상이 되게 — 이름은 서버가 정한 실제 폴더명
+          if (j.ok && j.folder) setRfpActive(String(j.folder).split(/[\\/]/).pop());
+          setRfp(j.ok ? {state: 'ok', msg: `완료 · 파일 ${(j.made || []).length}개`, folder: j.folder}
+                      : {state: 'err', msg: j.current});
+          loadInbox();
+        }).catch(() => setRfp({state: 'err', msg: '서버 응답이 끊겼습니다.'}));
+      setTimeout(poll, 800);
+    }).catch((e) => setRfp({state: 'err', msg: e.message}));
+  };
+
+  const hits = KEY_HINTS.map((h) => ({k: h.k, n: (body.match(h.re) || []).length}));
+  const missing = hits.filter((h) => h.n === 0);
+
+  // 공고를 바꾸면 약칭도 **반드시** 따라 바꾼다.
+  // 예전에는 `if (!slug)` 라 옛 약칭이 남아, 1665 를 골랐는데 경로는 1617 것을
+  // 가리키는 일이 있었다(실측). 사용자가 직접 고친 약칭도 공고가 바뀌면 무의미하다.
+  const pickNotice = (v) => {
+    setNid(v);
+    const n = notices.find((x) => String(x.id) === String(v));
+    // 약칭은 **서버가 준 것**을 쓴다 — 규칙을 화면에서 복제하지 않는다(단일 출처).
+    setSlug(n ? (n.slug || '무제') : '');
+  };
+
+  // 업로드 — 여러 파일을 한 번에 보내고 진행을 폴링한다
+  // 업로드 목적지를 한 곳에서만 정한다 — 화면에 적힌 폴더와 실제로 올라가는
+  // 폴더가 어긋나면 오너는 파일을 어디로 보냈는지 알 수 없게 된다.
+  const uploadTarget = src === 'rfp'
+    ? rfpActive
+    : (nid ? folder.replace(/^.*[\\/]/, '') : '');
+
+  const upload = (files, category) => {
+    if (!srv) { setMsg('서버가 없어 업로드할 수 없습니다.'); return; }
+    // 「직접 받은 공고문」 갈래에서는 공고 번호가 없다 — 폴더를 직접 지정한다.
+    // 그러지 않으면 서식을 올릴 곳이 없어 G5(형식 검사)를 영영 통과 못 한다.
+    if (!uploadTarget) {
+      setMsg(src === 'rfp' ? '먼저 위에서 작성 폴더를 고르세요.' : '먼저 공고를 선택하세요.');
+      return;
+    }
+    const fd = new FormData();
+    fd.append('notice_id', nid || '0');
+    fd.append('slug', slug || '무제');
+    if (src === 'rfp') fd.append('folder', uploadTarget);
+    fd.append('category', category);
+    files.forEach((f, i) => fd.append('f' + i, f, f.name));
+    setBusy(true);
+    setMsg(files.length + '개 전송 중…');
+    fetch(API + '/api/upload', {method: 'POST', body: fd})
+      .then((r) => r.json())
+      .then((r) => {
+        if (r.error) throw new Error(r.error);
+        const poll = () => fetch(API + '/api/jobs?id=' + r.job)
+          .then((x) => x.json())
+          .then((j) => {
+            setJobs((prev) => {
+              const rest = prev.filter((p) => p.id !== j.id);
+              return [{...j, category: category}].concat(rest).slice(0, 6);
+            });
+            if (!j.done) { setMsg(j.current || '처리 중…'); setTimeout(poll, 1200); }
+            else {
+              setBusy(false);
+              // 서버가 업로드 직후 배점표까지 뽑아 준다 — 결과를 바로 알려준다
+              setMsg('완료 — ' + (j.files || []).length + '개 처리'
+                     + (j.rubric ? ' · 배점표: ' + j.rubric : ''));
+            }
+          });
+        poll();
+      })
+      .catch((e) => { setBusy(false); setMsg('실패: ' + e.message); });
+  };
+
+  const openFolder = (mode) => {
+    if (!srv) { setMsg('서버가 없어 폴더를 열 수 없습니다.'); return; }
+    setMsg('여는 중…');
+    fetch(API + '/api/open', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({path: folder, mode: mode}),
+    }).then((r) => r.json())
+      .then((r) => setMsg(r.ok ? '열었습니다 — ' + r.message : '실패: ' + (r.error || r.message)))
+      .catch((e) => setMsg('실패: ' + e.message));
+  };
+
+  const noticeMd = body.trim()
+    ? ['# 공고 원문 (수동 입력)', '', '> 첨부 공고문에서 직접 옮긴 본문입니다.',
+       '> 입력일: ' + new Date().toISOString().slice(0, 10), '', body.trim(), ''].join('\n')
+    : '';
+
+  const done1 = !!nid;
+  const done2 = jobs.some((j) => j.category === '공고첨부') || body.trim().length > 200;
+  const done3 = jobs.some((j) => j.category === '오너자료');
+
+  return (
+    <div>
+      <h2 className="sec-title">사업계획서 작성 준비</h2>
+      <p className="sec-desc">
+        공고문과 오너 자료를 올리면 서버가 <b>PDF·WORD·EXCEL·PPT·이미지</b>에서 텍스트를 뽑아
+        작성 폴더에 넣습니다. 스캔본·사진은 <b>OCR</b> 로 읽습니다.
+      </p>
+
+      {srv === null && <Call label="확인 중">서버 연결을 확인하고 있습니다…</Call>}
+      {srv === false && (
+        <Call tone="warn" label="서버가 꺼져 있습니다">
+          업로드·OCR·폴더 열기는 로컬 서버가 필요합니다.
+          프로젝트 폴더의 <code>_대시보드_시작.bat</code> 을 더블클릭해 주세요.
+          지금은 <b>붙여넣기와 명령 복사만</b> 됩니다.
+        </Call>
+      )}
+      {srv && (
+        <Call tone="ok" label="서버 연결됨">
+          OCR {srv.ocr ? <b>사용 가능</b> : <b>불가 (Ollama 를 켜주세요)</b>}
+          {srv.ocr ? ' — ' + srv.vision_model : ''} · 작성 폴더 <code>{srv.proposal_root}</code>
+        </Call>
+      )}
+
+      {srv ? <ProposalMonitor /> : null}
+      <ol className="steps" style={{marginTop: 18}}>
+        <li className={done1 ? 'done' : ''}>
+          <b>공고를 고릅니다</b>
+          {/* 두 갈래를 동시에 보여 줬더니 드롭존이 세 개로 늘어 어디에 무엇을
+              올리는지 구분되지 않았다. 한 번에 한 갈래만 보이게 한다. */}
+          <div className="srcTabs" role="tablist" style={{marginTop: 10}}>
+            <button className="srcTab" role="tab"
+              aria-selected={src === 'list'} onClick={() => setSrc('list')}>
+              📋 수집된 공고에서 고르기
+              <span>자동 수집 {notices.length}건 중 선택</span>
+            </button>
+            <button className="srcTab" role="tab"
+              aria-selected={src === 'rfp'} onClick={() => setSrc('rfp')}>
+              📨 직접 받은 공고문
+              <span>이메일 공고 · 민간 제안요청서</span>
+            </button>
+          </div>
+
+          {src === 'list' ? (
+          <React.Fragment>
+          <div className="controls" style={{marginTop: 12}}>
+            {noticeErr ? (
+              <div className="small" style={{flexBasis: '100%', color: 'var(--critical)', marginBottom: 6}}>
+                ⚠️ 공고 목록을 불러오지 못했습니다 — {String(noticeErr).slice(0, 110)}
+                <br />
+                <b>DB 비밀번호를 바꾸셨다면</b> 바탕화면 아이콘을 다시 눌러 서버를 새로 띄우십시오.
+              </div>
+            ) : null}
+            {notices.length > 0 ? (
+              <select className="btn" style={{maxWidth: 460}} value={nid}
+                onChange={(e) => pickNotice(e.target.value)}>
+                <option value="">— 게이트 통과 공고 {notices.length}건 —</option>
+                {notices.map((n) => (
+                  <option key={n.id} value={n.id}>
+                    [{n.id}] {n.title.slice(0, 44)}{n.apply_end ? ' · 마감 ' + n.apply_end : ''}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input className="btn" style={{width: 120}} placeholder="공고 ID" value={nid}
+                onChange={(e) => setNid(e.target.value.replace(/\D/g, ''))} />
+            )}
+            <input className="btn" style={{width: 200}} placeholder="폴더 약칭"
+              value={slug} onChange={(e) => setSlug(e.target.value)} />
+            <button className="btn pri" disabled={!srv || !nid || (mk && mk.state === 'run')}
+              title="작성 폴더를 실제로 만듭니다 — 배점표 추출 + 근거 자료 회수"
+              onClick={() => makeFolder(false)}>
+              {mk && mk.state === 'run' ? '만드는 중…' : '작성 폴더 만들기'}
+            </button>
+            <CopyBtn text={cmdMake} label="명령 복사" />
+          </div>
+          {nid ? (
+            <div className="path" style={{marginTop: 8}}>
+              {folder}
+              {picked ? (
+                <span style={{marginLeft: 8, fontWeight: 600,
+                       color: picked.folder_exists ? 'var(--accent)' : 'var(--muted)'}}>
+                  {picked.folder_exists ? '· 폴더 있음' : '· 아직 없음'}
+                </span>
+              ) : (
+                <span style={{marginLeft: 8, color: 'var(--muted)'}}>· 추정 경로</span>
+              )}
+            </div>
+          ) : null}
+          {mk ? (
+            <div className="small" style={{marginTop: 8, display: 'flex',
+                 gap: 8, alignItems: 'center', flexWrap: 'wrap'}}>
+              <span style={{color: mk.state === 'err' ? 'var(--critical)'
+                            : mk.state === 'ok' ? 'var(--accent)' : 'var(--muted)'}}>
+                {mk.state === 'run' ? '⏳ ' : mk.state === 'ok' ? '✅ ' : '⚠️ '}{mk.msg}
+                {mk.state === 'ok' && mk.made ? ' · 파일 ' + mk.made + '개' : ''}
+              </span>
+              {mk.state === 'ok' && mk.folder ? (
+                <button className="btn sm"
+                  onClick={() => fetch(API + '/api/open', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({path: mk.folder, mode: ''}),
+                  }).catch(() => {})}>📂 폴더 열기</button>
+              ) : null}
+              {mk.state === 'err' && /이미 있습니다/.test(mk.msg || '') ? (
+                <button className="btn sm"
+                  title="기존 폴더를 덮어씁니다 — 작성물이 사라질 수 있습니다"
+                  onClick={() => { if (window.confirm('기존 작성물이 사라질 수 있습니다. 덮어쓸까요?')) makeFolder(true); }}>
+                  덮어쓰기
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+          <div className="small" style={{marginTop: 6, color: 'var(--muted)'}}>
+            버튼을 누르면 공고문에서 <b>배점표·자격·제출서류</b>를 뽑고
+            <b> 근거 자료</b>를 모아 폴더를 만듭니다 (1~3분).
+            「명령 복사」는 터미널에서 직접 돌리고 싶을 때만 쓰세요.
+          </div>
+          </React.Fragment>
+          ) : (
+          <div style={{marginTop: 12}}>
+            <div className="small" style={{margin: '0 0 10px', color: 'var(--muted)'}}>
+              <b>1)</b> 사업명을 적고 <b>2)</b> 공고문을 올린 뒤 <b>3)</b> [작성 폴더 만들기].
+              파일은 <code>사업계획서\_받은공고문\&lt;사업명&gt;\</code> 에 원본 그대로 보관됩니다.
+              <b> 터미널을 쓰지 않아도 됩니다.</b>
+            </div>
+            <div className="controls">
+              <input className="btn" type="text" style={{width: 280}}
+                placeholder="1) 사업명 — 폴더 이름이 됩니다"
+                value={rfpName} onChange={(e) => setRfpName(e.target.value)} />
+            </div>
+            <div style={{marginTop: 8}}>
+              <UploadBox label="2) 받은 공고문을 올립니다" category="받은공고문"
+                onUp={(fs) => uploadRfp(fs)} disabled={!srv || !rfpName.trim()} />
+              {!rfpName.trim() ? (
+                <div className="small" style={{marginTop: 6, color: 'var(--muted)'}}>
+                  ↑ 먼저 사업명을 적으셔야 올릴 수 있습니다.
+                </div>
+              ) : null}
+            </div>
+            {inbox.length > 0 ? (
+              <div style={{marginTop: 10}}>
+                <div className="small" style={{marginBottom: 6}}>3) 보관된 공고문 — 여기서 폴더를 만듭니다</div>
+                {inbox.map((it) => (
+                  <div key={it.name} className="panel"
+                    onClick={() => { if (it.made) setRfpActive(it.folder); }}
+                    style={{marginBottom: 6, padding: '8px 12px', display: 'flex',
+                            gap: 10, alignItems: 'center', flexWrap: 'wrap',
+                            cursor: it.made ? 'pointer' : 'default',
+                            borderColor: rfpActive === it.folder ? 'var(--accent)' : undefined}}>
+                    <b style={{fontSize: '.85rem', flex: '1 1 200px'}}>{it.name}</b>
+                    <span className="small">파일 {it.files}개</span>
+                    {it.made ? (
+                      <span className="small" style={{color: 'var(--accent)'}}>
+                        {rfpActive === it.folder ? '● 선택됨 — 아래 2·3단계가 이 폴더로' : '✅ 작성 폴더 있음 (눌러서 선택)'}
+                      </span>
+                    ) : (
+                      <button className="btn pri sm"
+                        disabled={rfp && rfp.state === 'run'}
+                        onClick={() => makeFromRfp(it.name, false)}>작성 폴더 만들기</button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : null}
+            {rfp ? (
+              <div className="small" style={{marginTop: 8,
+                   color: rfp.state === 'err' ? 'var(--critical)'
+                          : rfp.state === 'ok' ? 'var(--accent)' : 'var(--muted)'}}>
+                {rfp.state === 'run' ? '⏳ ' : rfp.state === 'ok' ? '✅ ' : '⚠️ '}{rfp.msg}
+              </div>
+            ) : null}
+          </div>
+          )}
+        </li>
+
+        <li className={done2 ? 'done' : ''}>
+          <b>공고문·첨부를 올립니다</b>
+          <div className="small" style={{margin: '4px 0 8px'}}>
+            <div style={{marginBottom: 6}}>
+              올릴 곳{' '}
+              <b style={{color: uploadTarget ? 'var(--accent)' : 'var(--muted)'}}>
+                {uploadTarget ? '📁 ' + uploadTarget
+                  : (src === 'rfp' ? '— 위에서 작성 폴더를 먼저 고르세요'
+                                   : '— 위에서 공고를 먼저 고르세요')}
+              </b>
+            </div>
+            PDF·HWPX·WORD·EXCEL·PPT·PNG·JPG — <b>여러 개를 한 번에</b> 올릴 수 있습니다.
+            스캔본이면 자동으로 OCR 합니다. 파일명에 <b>서식·양식·신청서</b>가 있으면 양식으로 분류하세요.
+          </div>
+          <div className="controls" style={{marginBottom: 8}}>
+            <UploadBox label="공고문·첨부" category="공고첨부" onUp={upload} disabled={!srv || busy}
+              folderPath={nid ? folder : '사업계획서'} />
+            <UploadBox label="지정 서식" category="양식" onUp={upload} disabled={!srv || busy}
+              folderPath={nid ? folder : '사업계획서'} />
+          </div>
+          <details>
+            <summary className="small">서버 없이 쓰기 — 본문 붙여넣기</summary>
+            <textarea className="ta" value={body} style={{marginTop: 8}}
+              placeholder="공고문 전문을 붙여넣으세요…"
+              onChange={(e) => setBody(e.target.value)} />
+            {body.trim() ? (
+              <div style={{marginTop: 6}}>
+                <div className="chips">
+                  {hits.map((h) => <Chip key={h.k} k={h.n ? 'ok' : 'warn'}>{h.k} {h.n ? h.n + '곳' : '없음'}</Chip>)}
+                </div>
+                <div className="controls" style={{marginTop: 6}}>
+                  <CopyBtn text={noticeMd} label="공고원문.md 복사" />
+                </div>
+              </div>
+            ) : null}
+          </details>
+        </li>
+
+        <li className={done3 ? 'done' : ''}>
+          <b>오너 자료를 올립니다</b>
+          <div className="small" style={{margin: '4px 0 8px'}}>
+            공고가 요구하는 증빙입니다. 사진으로 찍은 자격증도 OCR 로 읽습니다.
+          </div>
+          <div className="tw" style={{maxHeight: 'none', marginBottom: 8}}>
+            <table>
+              <thead><tr><th>자료</th><th>왜 필요한가</th></tr></thead>
+              <tbody>
+                {OWNER_DOCS.map((r) => (
+                  <tr key={r[0]}><td><b>{r[0]}</b></td><td className="small">{r[1]}</td></tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <UploadBox label="오너 자료" category="오너자료" onUp={upload} disabled={!srv || busy}
+            folderPath={nid ? folder : '사업계획서'} />
+        </li>
+
+        <li>
+          <b>작성을 시작합니다</b>
+          <div className="small" style={{margin: '4px 0 8px'}}>
+            업로드가 끝났으면 아래 버튼으로 작성 폴더를 엽니다. 어느 쪽으로 열든
+            그 폴더의 <code>CLAUDE.md</code> 가 자동으로 읽혀 RAG 근거로 바로 작성할 수 있습니다.
+          </div>
+          <div className="controls">
+            <button className="btn pri" disabled={!srv || !nid} onClick={() => openFolder('both')}
+              title="Claude 터미널(왼쪽)과 Claude 데스크탑(오른쪽)을 함께 엽니다">
+              업로드 완료 — Claude 열기
+            </button>
+            <button className="btn" disabled={!srv || !nid || srv.claude_cli === false}
+              onClick={() => openFolder('cli')}
+              title={srv && srv.claude_cli === false
+                ? 'claude 명령을 찾지 못했습니다 (CLI 미설치)'
+                : '명령창에서 Claude Code 를 이 폴더로 엽니다'}>
+              클로드 터미널 열기
+            </button>
+            <button className="btn" disabled={!srv || !nid || srv.claude_desktop === false}
+              onClick={() => openFolder('desktop')}
+              title={srv && srv.claude_desktop === false
+                ? 'Claude Desktop 이 설치돼 있지 않습니다'
+                : 'Claude Desktop 앱에서 이 폴더를 프로젝트로 엽니다'}>
+              클로드 데스크탑 열기
+            </button>
+            <button className="btn" disabled={!srv || !nid} onClick={() => openFolder('')}>
+              폴더만 열기
+            </button>
+          </div>
+          <div className="small" style={{marginTop: 6, color: 'var(--muted)'}}>
+            {srv && srv.claude_cli === false && srv.claude_desktop === false
+              ? '이 PC 에서 Claude 를 찾지 못했습니다 — 폴더만 열립니다.'
+              : '아이콘(바탕화면 「사업계획서 작성」)은 「Claude 열기」와 같은 동작입니다.'}
+          </div>
+        </li>
+      </ol>
+
+      {msg ? <Call tone={busy ? 'info' : 'ok'} label={busy ? '진행 중' : '알림'}>{msg}</Call> : null}
+
+      {jobs.length > 0 && (
+        <div style={{marginTop: 18}}>
+          <h3 className="sec-title" style={{fontSize: 15}}>업로드 모니터링</h3>
+          {jobs.map((j) => (
+            <div key={j.id} className="panel" style={{marginBottom: 10}}>
+              <div className="controls" style={{marginBottom: 6}}>
+                <Chip k={j.done ? 'ok' : ''}>{j.category}</Chip>
+                <Chip>{j.done ? '완료' : '진행 중'}</Chip>
+                <span className="small">{j.current}</span>
+              </div>
+              <div className="path small">{j.dest}</div>
+              {(j.files || []).map((f, i) => (
+                <div key={i} style={{marginTop: 6}}>
+                  <div className="controls">
+                    <Chip k={f.confidence === 'high' ? 'ok' : (f.confidence === 'none' ? 'warn' : '')}>
+                      {f.method}
+                    </Chip>
+                    <b className="small">{f.file}</b>
+                    <span className="small">{f.chars}자</span>
+                  </div>
+                  {(f.warnings || []).map((w, k) => (
+                    <div key={k} className="small" style={{color: 'var(--critical)'}}>⚠️ {w}</div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function UploadBox({label, category, onUp, disabled, folderPath}) {
+  // folderPath 가 오면 제목 옆에 '저장 폴더 열기'를 단다 — 어디에 쌓이는지
+  // 탐색기로 바로 확인하고, 올릴 파일을 그 옆 폴더에서 끌어올 수 있게.
+  const openSaveFolder = (e) => {
+    e.stopPropagation();           // 드롭존 클릭(파일 선택)과 겹치지 않게
+    fetch(API + '/api/open', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({path: folderPath, mode: ''}),
+    }).catch(() => {});
+  };
+  const [over, setOver] = useState(false);
+  const ref = React.useRef(null);
+  const take = (list) => {
+    const a = Array.from(list || []);
+    if (a.length && !disabled) onUp(a, category);
+  };
+  return (
+    <div className={'drop' + (over ? ' over' : '')} style={{flex: 1, opacity: disabled ? .5 : 1}}
+      onDragOver={(e) => { e.preventDefault(); setOver(true); }}
+      onDragLeave={() => setOver(false)}
+      onDrop={(e) => { e.preventDefault(); setOver(false); take(e.dataTransfer.files); }}
+      onClick={() => !disabled && ref.current && ref.current.click()}>
+      <div className="big">{label}</div>
+      <div className="small">끌어다 놓거나 눌러서 선택 · 여러 개 가능</div>
+      {folderPath ? (
+        <button className="btn sm" style={{marginTop: 8}}
+          title={'탐색기로 저장 위치를 엽니다: ' + folderPath}
+          onClick={openSaveFolder}>📂 저장 폴더 열기</button>
+      ) : null}
+      <input ref={ref} type="file" multiple style={{display: 'none'}}
+        onChange={(e) => { take(e.target.files); e.target.value = ''; }} />
+    </div>
+  );
+}
+
+
+// ─────────────── 오늘의 공모 브리핑 (①②③) ───────────────
+// 조사 스냅샷(data.js)이 아니라 서버의 "지금 DB"를 본다.
+// 서버가 없으면 숫자를 지어내지 않는다 — 없다고 말한다.
+
+function TrendChart({points}) {
+  const pts = (points || []).filter((p) => p && p.d && p.n != null);
+  if (pts.length < 2) return null;
+  const W = 560, H = 120, PAD = 24;
+  const max = Math.max.apply(null, pts.map((p) => p.n).concat([1]));
+  const xs = (i) => PAD + (W - 2 * PAD) * (i / (pts.length - 1));
+  const ys = (n) => H - PAD - (H - 2 * PAD) * (n / max);
+  const line = pts.map((p, i) => xs(i).toFixed(1) + ',' + ys(p.n).toFixed(1)).join(' ');
+  const area = xs(0).toFixed(1) + ',' + (H - PAD) + ' ' + line + ' '
+             + xs(pts.length - 1).toFixed(1) + ',' + (H - PAD);
+  const last = pts[pts.length - 1];
+  return (
+    <div className="tw" style={{maxHeight: 'none', overflowY: 'hidden'}}>
+      <svg viewBox={'0 0 ' + W + ' ' + H} style={{width: '100%', maxWidth: 640, display: 'block'}}
+        role="img" aria-label="일자별 신규 공고 수집 추이">
+        <polygon points={area} fill="var(--accent-soft)" opacity="0.65" />
+        <polyline points={line} fill="none" stroke="var(--accent)" strokeWidth="2"
+          strokeLinejoin="round" strokeLinecap="round" />
+        <line x1={PAD} y1={H - PAD} x2={W - PAD} y2={H - PAD} stroke="var(--rule)" />
+        <circle cx={xs(pts.length - 1)} cy={ys(last.n)} r="3.5" fill="var(--accent)" />
+        <text x={PAD} y={H - 8} fontSize="10" fill="var(--muted)">{String(pts[0].d).slice(5)}</text>
+        <text x={W - PAD} y={H - 8} fontSize="10" fill="var(--muted)" textAnchor="end">
+          {String(last.d).slice(5)}</text>
+        <text x={xs(pts.length - 1) - 6} y={ys(last.n) - 8} fontSize="11" fontWeight="700"
+          fill="var(--ink)" textAnchor="end">{last.n}건</text>
+      </svg>
+    </div>
+  );
+}
+
+function HeroBriefing() {
+  const [sum, setSum] = useState(null);          // null=확인중 · false=서버없음
+  useEffect(() => {
+    fetch(API + '/api/summary')
+      .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(setSum)
+      .catch(() => setSum(false));
+  }, []);
+
+  const t = new Date();
+  const dstr = t.getFullYear() + '년 ' + (t.getMonth() + 1) + '월 ' + t.getDate() + '일 ('
+             + '일월화수목금토'[t.getDay()] + ')';
+
+  return (
+    <section className="panel" style={{marginBottom: 24, padding: '18px 20px'}}>
+      <div className="small" style={{color: 'var(--muted)', letterSpacing: '.03em'}}>{dstr}</div>
+      <h2 className="sec-title" style={{margin: '2px 0 14px'}}>오늘의 공모 브리핑</h2>
+
+      {sum === null && <div className="small">실시간 현황 확인 중…</div>}
+      {sum === false && (
+        <div className="small">
+          마감 임박·수집 현황은 서버가 켜져 있을 때 표시됩니다 —
+          {' '}<code>_대시보드_시작.bat</code> 을 더블클릭하세요.
+        </div>
+      )}
+
+      {sum && sum !== false && (
+        <div>
+          {(sum.urgent || []).length ? (
+            <div style={{display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 16}}>
+              {sum.urgent.slice(0, 3).map((u) => (
+                <a key={u.id} href={u.url || '#'} target="_blank" rel="noreferrer"
+                  className="call" style={{display: 'flex', gap: 10, alignItems: 'center',
+                    textDecoration: 'none', color: 'inherit', margin: 0, flex: '1 1 250px'}}>
+                  <Chip k={u.dday <= 3 ? 'warn' : ''}>
+                    {u.dday === 0 ? '오늘 마감' : 'D-' + u.dday}
+                  </Chip>
+                  <span style={{minWidth: 0}}>
+                    <b style={{display: 'block', fontSize: '.82rem', lineHeight: 1.35}}>
+                      {String(u.title).slice(0, 44)}</b>
+                    <span className="small">{u.agency || '기관 미상'} · ~{u.end}</span>
+                  </span>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <div className="small" style={{marginBottom: 14}}>
+              14일 이내 마감 공고가 없습니다.
+              {' '}<code>python -m choi run</code> 으로 새 공고를 수집해 보세요.
+            </div>
+          )}
+
+          <dl className="kpis">
+            <Kpi label="마감 7일 이내" value={sum.deadline_7d + '건'}
+              tone={sum.deadline_7d ? 'crit' : ''} note="놓치면 점수가 의미 없다" />
+            <Kpi label="게이트 통과" value={sum.gate_passed + '건'} note="지원 후보 공고" />
+            <Kpi label="자격 미확인" value={sum.no_extraction + '건'}
+              tone={sum.no_extraction ? 'warn' : 'ok'} note="공고문 업로드 필요 (G1)" />
+            <Kpi label="작성 중" value={sum.proposals + '건'} note="사업계획서 폴더" />
+          </dl>
+
+          {(sum.trend || []).length >= 2 && (
+            <div style={{marginTop: 18}}>
+              <div className="small" style={{marginBottom: 4}}>
+                일자별 신규 공고 수집 — 그래프가 멈추면 수집기가 멈춘 것입니다
+              </div>
+              <TrendChart points={sum.trend} />
+            </div>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function Overview(props) {
+  return (
+    <div>
+      <HeroBriefing />
+      <OverviewBody {...props} />
+    </div>
+  );
+}
+
+
 const TABS = [
+  {id:'prepare',   group:'실행', label:'사업계획서',   C:Prepare,   n:d => null},
   {id:'overview',  group:'진단', label:'개요',        C:Overview,  n:d => null},
   {id:'market',    group:'진단', label:'시장·시설자금', C:Market,    n:d => null},
   {id:'priority',  group:'자료', label:'우선순위',     C:Priority,  n:d => d.priority_channels.length},
@@ -1155,10 +3576,15 @@ const TABS = [
   {id:'programs',  group:'자료', label:'공고 사례',    C:Programs,  n:d => d.programs.length},
   {id:'datasets',  group:'자료', label:'공공데이터',   C:Datasets,  n:d => d.datasets.length},
   {id:'keywords',  group:'자료', label:'키워드',      C:Keywords,  n:d => Object.values(d.keywords).flat().length},
-  {id:'profile',   group:'실행', label:'프로필',      C:Profile,   n:d => null},
-  {id:'experts',   group:'실행', label:'전문가 풀',    C:Experts,   n:d => (d.experts || []).length},
   {id:'roadmap',   group:'실행', label:'로드맵',      C:Roadmap,   n:d => null},
   {id:'risks',     group:'실행', label:'리스크',      C:Risks,     n:d => d.license_warnings.length + d.open_questions.length},
+  // 가장 우측 — 막힐 때 찾는 곳이므로 위치를 고정한다
+  {id:'guide',     group:'도움', label:'사용법',      C:Guide,     n:d => null},
+  // New데이터수집은 탭이 아니라 행동 버튼 — TABS 렌더링 쪽에서 특수 처리한다
+  {id:'_refresh',  group:'도움', label:'New데이터수집', C:null,      n:d => null,
+   action: true},
+  // AI 설정은 사용법보다도 오른쪽 — 한 번 넣으면 자주 올 일이 없다
+  {id:'ai',        group:'도움', label:'AI 설정',     C:AISetup,   n:d => null},
 ];
 
 function App() {
@@ -1166,6 +3592,11 @@ function App() {
   const [live, setLive] = useState(null);
   const [err, setErr] = useState(null);
   const [tab, setTab] = useState(() => location.hash.slice(1) || 'overview');
+  // 전역 AI 챗봇 — 어느 탭에서든 ✨ 버튼으로 연다.
+  // 이력을 App 이 들고 있어 탭을 옮겨도 대화가 이어진다(종·횡 연계).
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiMsgs, setAiMsgs] = useState([]);
+  const [rfOpen, setRfOpen] = useState(false);   // New 데이터수집 패널
 
   useEffect(() => {
     // 1순위: data.js 가 심어둔 전역 (file:// 더블클릭에서도 동작)
@@ -1184,14 +3615,45 @@ function App() {
 
   useEffect(() => { location.hash = tab; }, [tab]);
 
-  // 다크 토큰이 CSS 에 완성돼 있는데 data-theme 을 세우는 코드가 없어 발동한 적이 없었다.
+  // ── 화면 모드 (라이트 / 다크) ──
+  // 예전 코드는 data-theme 속성만 읽어 뒤집었다. 시스템이 다크인데 속성이
+  // 없으면 첫 클릭이 'dark' 를 세워 **아무 변화가 없었다** — 오너에겐 고장이다.
+  // 지금 실제로 보이는 모드를 먼저 확정해 두고, 그걸 뒤집는다.
   // localStorage 는 사생활 모드·차단 설정에서 던지므로 반드시 감싼다.
+  const [theme, setTheme] = useState('light');
+  const [themePinned, setThemePinned] = useState(false);   // 사용자가 직접 골랐나
+
   useEffect(() => {
-    try {
-      const t = localStorage.getItem('choi-theme');
-      if (t) document.documentElement.setAttribute('data-theme', t);
-    } catch (e) {}
+    let saved = null;
+    try { saved = localStorage.getItem('choi-theme'); } catch (e) {}
+    const mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme:dark)') : null;
+    const start = saved || (mq && mq.matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', start);
+    setTheme(start);
+    setThemePinned(!!saved);
+    if (!saved && mq) {
+      // 아직 직접 고르지 않았다면 시스템 설정을 계속 따라간다
+      const follow = (e) => {
+        const t = e.matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', t);
+        setTheme(t);
+      };
+      if (mq.addEventListener) mq.addEventListener('change', follow);
+      else if (mq.addListener) mq.addListener(follow);      // 구형 사파리
+      return () => {
+        if (mq.removeEventListener) mq.removeEventListener('change', follow);
+        else if (mq.removeListener) mq.removeListener(follow);
+      };
+    }
   }, []);
+
+  const flipTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    setTheme(next);
+    setThemePinned(true);
+    try { localStorage.setItem('choi-theme', next); } catch (e) {}
+  };
 
   if (err) return (
     <div className="wrap" style={{paddingTop:'3rem'}}>
@@ -1218,13 +3680,16 @@ function App() {
               <h1>명상·심리치유 공모사업 대시보드</h1>
             </div>
             <div className="mast-meta">
-              <button type="button" className="pill" style={{marginRight:'.4rem'}}
-                onClick={() => {
-                  const cur = document.documentElement.getAttribute('data-theme');
-                  const next = cur === 'dark' ? 'light' : 'dark';
-                  document.documentElement.setAttribute('data-theme', next);
-                  try { localStorage.setItem('choi-theme', next); } catch (e) {}
-                }}>화면 밝기</button>
+              {/* 아이콘은 **바뀔 모드**를 가리킨다 (라이트일 때 🌙 = 누르면 어두워짐).
+                  이모지만 있는 버튼이라 aria-label 로 무엇인지 말해 준다. */}
+              <button type="button" className="themeBtn" onClick={flipTheme}
+                aria-label={(theme === 'dark' ? '라이트' : '다크') + ' 모드로 전환'}
+                title={'지금 ' + (theme === 'dark' ? '다크' : '라이트') + ' 모드'
+                       + (themePinned ? '' : ' (시스템 설정 따름)')
+                       + ' — 눌러서 ' + (theme === 'dark' ? '밝게' : '어둡게')}>
+                <span aria-hidden="true">{theme === 'dark' ? '☀️' : '🌙'}</span>
+                <em>{theme === 'dark' ? '라이트' : '다크'}</em>
+              </button>
               <span>조사 {data.generated_at}</span>
               <span>채널 {data.channels.length}</span>
               <span>데이터셋 {data.datasets.length}</span>
@@ -1236,6 +3701,15 @@ function App() {
           <nav aria-label="대시보드 섹션">
             {TABS.map((t, i) => {
               const n = t.n(data);
+              // 행동 버튼(action) — 탭 전환이 아니라 패널을 연다
+              if (t.action) return (
+                <Fragment key={t.id}>
+                  {i > 0 && TABS[i-1].group !== t.group && <span className="nav-sep" aria-hidden="true" />}
+                  <button type="button" className="nav-act"
+                          title="수집→본문→중복→게이트→RAG→화면 전체를 오늘 기준으로 갱신합니다"
+                          onClick={() => setRfOpen(true)}>🔄 {t.label}</button>
+                </Fragment>
+              );
               return (
                 <Fragment key={t.id}>
                   {i > 0 && TABS[i-1].group !== t.group && <span className="nav-sep" aria-hidden="true" />}
@@ -1250,6 +3724,18 @@ function App() {
         </div>
       </header>
       <main><div className="wrap"><Active d={data} live={live} /></div></main>
+      {/* 서랍이 열려 있으면 FAB 를 숨긴다 — 작업줄과 자리가 겹친다.
+          닫기·내리기는 서랍 안에 있으므로 기능 손실이 없다. */}
+      {!aiOpen ? (
+        <button type="button" className="aiFab" aria-label="AI 도우미 열기"
+          onClick={() => setAiOpen(true)}>✨ AI 도우미</button>
+      ) : null}
+      {aiOpen ? (
+        <AIChat tab={tab} data={data} live={live}
+          msgs={aiMsgs} setMsgs={setAiMsgs} onClose={() => setAiOpen(false)} />
+      ) : null}
+      {rfOpen ? <RefreshPanel onClose={() => setRfOpen(false)} /> : null}
+
       <footer><div className="wrap">
         <p style={{margin:'0 0 .5rem'}}><b>정본 경로</b></p>
         <p className="path" style={{margin:'0 0 .2rem'}}>C:\AICAMP_CHOI\dashboard\index.html</p>
