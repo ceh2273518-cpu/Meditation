@@ -2470,6 +2470,72 @@ function Market({d, live}) {
   );
 }
 
+/* ─────────────── 탭: 전문가 풀 ─────────────── */
+
+function Experts({d}) {
+  const experts = d.experts || [];
+  const [q, setQ] = useState('');
+  const [type, setType] = useState('전체');
+
+  const types = useMemo(() => ['전체', ...new Set(experts.map(e => e.type))], [experts]);
+  const rows = useMemo(() => experts.filter(e => {
+    if (type !== '전체' && e.type !== type) return false;
+    if (!q) return true;
+    const s = q.toLowerCase();
+    return ['name','program','affiliation','qualification','contact']
+      .some(k => (e[k] || '').toLowerCase().includes(s));
+  }), [experts, q, type]);
+
+  const typeRows = useMemo(() => {
+    const m = {};
+    experts.forEach(e => { m[e.type] = (m[e.type] || 0) + 1; });
+    return Object.entries(m).map(([label, value]) => ({label, value})).sort((a,b) => b.value - a.value);
+  }, [experts]);
+
+  return (
+    <Fragment>
+      <h2 className="sec-title">전문가 풀 {experts.length}건</h2>
+      <p className="sec-desc">"프로그램명 → 섭외 가능한 전문가" 인덱스입니다. 공고 하나를 보고
+        <b> 이 프로그램에 누구를 섭외하지, 어떻게 연락하지</b>를 바로 찾을 때 씁니다.
+        원본은 <span className="mono">docs/research/P2_프로그램명_전문가인덱스.md</span> — 이 파일을 고치고
+        다시 빌드하면 여기도 그대로 바뀝니다.</p>
+      <Call tone="warn" label="전제 — 플랫폼은 제휴 주체가 아니다">
+        <p>웃는코끼리·마보·하루명상은 개인사업자·프리랜서 전문가가 자기 프로그램을 올려두는 장터/앱입니다.
+          기관 대 기관 MOU로 소속 전문가 전원을 대표하지 못합니다. <b>제휴는 언제나 개인 전문가 단위</b>로
+          이뤄집니다 — 그래서 "소속"란에는 항상 그 사람의 실제 소속기관을 적었고, 플랫폼명은 어디서 찾았는지
+          참고용으로만 남겼습니다.</p>
+      </Call>
+      <div className="panel" style={{marginBottom:'1.1rem'}}>
+        <h3>유형별 분포</h3>
+        <Bars rows={typeRows} />
+      </div>
+      <div className="controls">
+        <input type="search" aria-label="전문가 검색" value={q}
+               onChange={e => setQ(e.target.value)} placeholder="이름·프로그램·소속·자격·연락처 검색…" />
+        <select aria-label="유형 필터" value={type} onChange={e => setType(e.target.value)}>
+          {types.map(t => <option key={t} value={t}>{t === '전체' ? '유형 — 전체' : t}</option>)}
+        </select>
+        <span className="count">{rows.length.toLocaleString()} / {experts.length.toLocaleString()}</span>
+      </div>
+      <DataTable
+        emptyHint={q ? `"${q}" 로는 찾지 못했습니다.` : '선택한 유형에 해당하는 전문가가 없습니다.'}
+        onReset={() => { setQ(''); setType('전체'); }}
+        csvName="choi_전문가풀.csv"
+        initialSort={{key:'type', dir:'asc'}}
+        columns={[
+          {key:'type', label:'유형', render:r => <Chip>{r.type}</Chip>},
+          {key:'program', label:'프로그램'},
+          {key:'name', label:'이름', render:r => <b>{r.name}</b>},
+          {key:'affiliation', label:'소속', render:r => <span className="small">{r.affiliation}</span>},
+          {key:'qualification', label:'자격', render:r => <span className="small">{r.qualification}</span>},
+          {key:'contact', label:'연락처', render:r => <span className="mono small">{r.contact}</span>},
+        ]}
+        rows={rows}
+      />
+    </Fragment>
+  );
+}
+
 /* ─────────────── 탭: 구현 계획 ─────────────── */
 
 function Roadmap({d}) {
@@ -3576,6 +3642,7 @@ const TABS = [
   {id:'programs',  group:'자료', label:'공고 사례',    C:Programs,  n:d => d.programs.length},
   {id:'datasets',  group:'자료', label:'공공데이터',   C:Datasets,  n:d => d.datasets.length},
   {id:'keywords',  group:'자료', label:'키워드',      C:Keywords,  n:d => Object.values(d.keywords).flat().length},
+  {id:'experts',   group:'실행', label:'전문가 풀',    C:Experts,   n:d => (d.experts || []).length},
   {id:'roadmap',   group:'실행', label:'로드맵',      C:Roadmap,   n:d => null},
   {id:'risks',     group:'실행', label:'리스크',      C:Risks,     n:d => d.license_warnings.length + d.open_questions.length},
   // 가장 우측 — 막힐 때 찾는 곳이므로 위치를 고정한다
